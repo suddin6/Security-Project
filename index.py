@@ -38,6 +38,11 @@ def screen():
     passcode = StringVar()
     Entry(textvariable=passcode, width=38, highlightthickness=1, font=("calibri", 13), show="*").place(x=20, y=180)
 
+    # Encrypt, Decrypt, and Reset buttons
+    Button(text="Encrypt", height=2, width=22, bg="lightgreen", fg="black", bd=0).place(x=20, y=230)
+    Button(text="Decrypt", height=2, width=22, bg="lightblue", fg="black", bd=0).place(x=206, y=230)
+    Button(text="Reset", height=2, width=48, bg="lightcoral", fg="black", bd=0).place(x=22, y=275)
+
     # Run the application
     screen.mainloop()
 # Display screen function when run is clicked
