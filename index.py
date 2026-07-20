@@ -47,6 +47,7 @@ def encryption():
             encrypted_output = Text(encrypt_screen, font=("calibri", 13), bg="white", relief=GROOVE, wrap=WORD, bd=0)
             encrypted_output.place(x=25, y=55, width=170, height=75)
             encrypted_output.insert(END, encrypted_text)
+            encrypted_output.configure(state=DISABLED)  # Read-Only
 
             # Scrollbar for encypted textbox
             en_scrollbar = Scrollbar(encrypted_output, orient=VERTICAL, command=encrypted_output.yview)
@@ -99,6 +100,7 @@ def decryption():
             decrypted_output = Text(decrypt_screen, font=("calibri", 13), bg="white", relief=GROOVE, wrap=WORD, bd=0)
             decrypted_output.place(x=25, y=55, width=170, height=75)
             decrypted_output.insert(END, decrypted_text)
+            decrypted_output.configure(state=DISABLED) # Read-Only
 
             # Scrollbar for decrypted textbox
             de_scrollbar = Scrollbar(decrypted_output, orient=VERTICAL, command=decrypted_output.yview)
