@@ -17,6 +17,7 @@ def encryption():
     # Get the passcode entered by user
     secret_key = passcode.get()
 
+    # Check is password is correct
     if secret_key == "CSI3480":
         # Encryption screen
         encrypt_screen = Toplevel(machine_screen)
@@ -41,6 +42,8 @@ def encryption():
         encrypted_output.configure(yscrollcommand=en_scrollbar.set)
         en_scrollbar.pack(side=RIGHT, fill=Y)
 
+
+    # Warning messages for empty or incorrect password
     elif secret_key == "":
         messagebox.showerror("ERROR", "Please input a password to continue.")
 
@@ -52,30 +55,39 @@ def decryption():
     # Get the passcode entered by user
     secret_key = passcode.get()
 
+    # Check is password is correct
     if secret_key == "CSI3480":
-        # Encryption screen
-        decrypt_screen = Toplevel(machine_screen)
-        decrypt_screen.title("Decrypted Text")
-        decrypt_screen.geometry("250x200")
-        decrypt_screen.configure(bg="lightblue")
-
-        # Decrypt the text entered by user
+        # The text entered by user
         msg = first_text.get(1.0, END)
-        decoded_msg = msg.encode("ascii")
-        bytes = base64.b64decode(decoded_msg)
-        decrypted_text = bytes.decode("ascii")
+        
+        # The encrypted text must be a multiple of 4 to be a valid encrypted text.
+        if len(msg.strip()) % 4 != 0:
+            # If message is not a multiple of 4, display error message
+            messagebox.showerror("ERROR", "Invalid input. Please enter a valid encrypted text.")
+        else:
+            # Decryption screen
+            decrypt_screen = Toplevel(machine_screen)
+            decrypt_screen.title("Decrypted Text")
+            decrypt_screen.geometry("250x200")
+            decrypt_screen.configure(bg="lightblue")
 
-        # Display decrypted text on the screen
-        Label(decrypt_screen, text="Decrypted Text:", font=("calibri", 13), fg="black", bg="lightblue").place(x=20, y=20)
-        decrypted_output = Text(decrypt_screen, font=("calibri", 13), bg="white", relief=GROOVE, wrap=WORD, bd=0)
-        decrypted_output.place(x=25, y=55, width=170, height=75)
-        decrypted_output.insert(END, decrypted_text)
+            # Decrypt the text entered by user
+            decoded_msg = msg.encode("ascii")
+            bytes = base64.b64decode(decoded_msg)
+            decrypted_text = bytes.decode("ascii")
 
-        # Scrollbar for decrypted textbox
-        de_scrollbar = Scrollbar(decrypted_output, orient=VERTICAL, command=decrypted_output.yview)
-        decrypted_output.configure(yscrollcommand=de_scrollbar.set)
-        de_scrollbar.pack(side=RIGHT, fill=Y)
+            # Display decrypted text on the screen
+            Label(decrypt_screen, text="Decrypted Text:", font=("calibri", 13), fg="black", bg="lightblue").place(x=20, y=20)
+            decrypted_output = Text(decrypt_screen, font=("calibri", 13), bg="white", relief=GROOVE, wrap=WORD, bd=0)
+            decrypted_output.place(x=25, y=55, width=170, height=75)
+            decrypted_output.insert(END, decrypted_text)
 
+            # Scrollbar for decrypted textbox
+            de_scrollbar = Scrollbar(decrypted_output, orient=VERTICAL, command=decrypted_output.yview)
+            decrypted_output.configure(yscrollcommand=de_scrollbar.set)
+            de_scrollbar.pack(side=RIGHT, fill=Y)
+
+    # Warning messages for empty or incorrect password
     elif secret_key == "":
         messagebox.showerror("ERROR", "Please input a password to continue.")
 
@@ -123,6 +135,6 @@ def machine_screen():
 
     # Run the application
     machine_screen.mainloop()
+
 # Display screen function when run is clicked
 machine_screen()
-
