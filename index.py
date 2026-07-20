@@ -12,17 +12,68 @@ from tkinter import messagebox
 import base64
 import os
 
+# Function for encrypting the text
+def encryption():
+    # Get the passcode entered by user
+    secret_key = passcode.get()
+
+    if secret_key == "CSI3480":
+        # Encryption screen
+        encrypt_screen = Toplevel(machine_screen)
+        encrypt_screen.title("Encrypted Text")
+        encrypt_screen.geometry("250x200")
+        encrypt_screen.configure(bg="lightgreen")
+
+        # Encrypt the text entered by user
+        msg = first_text.get(1.0, END)
+        encoded_msg = msg.encode("ascii")
+        bytes = base64.b64encode(encoded_msg)
+        encrypted_text = bytes.decode("ascii")
+
+        # Display encrypted text on the screen
+        Label(encrypt_screen, text=" Encrypted Text:", font=("calibri", 13), fg="black", bg="lightgreen").place(x=20, y=20)
+        encrypted_output = Text(encrypt_screen, font=("calibri", 13), bg="white", relief=GROOVE, wrap=WORD, bd=0)
+        encrypted_output.place(x=25, y=55, width=170, height=75)
+        encrypted_output.insert(END, encrypted_text)
+
+        # Scrollbar for encypted textbox
+        en_scrollbar = Scrollbar(encrypted_output, orient=VERTICAL, command=encrypted_output.yview)
+        encrypted_output.configure(yscrollcommand=en_scrollbar.set)
+        en_scrollbar.pack(side=RIGHT, fill=Y)
+
+    elif secret_key == "":
+        messagebox.showerror("ERROR", "Please input a password to continue.")
+
+    elif secret_key != "CSI3480":
+        messagebox.showerror("ERROR", "Incorrect Password. Please try again.")
+
+
+
+
+
+# Function for decrypting the text
+def decryption():
+    print("")
+
 # Main GUI Screen for Cipher Machine Tool
-def screen():
+def machine_screen():
+    # Global variables to use across all functions
+    global machine_screen, passcode, first_text
+
     # Main window screen title and size (using Tkinter)
-    screen = Tk()
-    screen.geometry("400x400")
-    screen.title("Cipher Machine")
+    machine_screen = Tk()
+    machine_screen.geometry("400x400")
+    machine_screen.title("Cipher Machine")
     
     # Favicon
     favicon = PhotoImage(file="favicon.png")
-    screen.iconphoto(False, favicon)
+    machine_screen.iconphoto(False, favicon)
     
+    # Function to reset the text and passcode fields
+    def reset_machine():
+        passcode.set("")
+        first_text.delete(1.0, END)
+
     # Textbox for user input
     Label(text="Enter Text:", fg="black", font=("calibri", 13)).place(x=20, y=20)
     first_text = Text(highlightthickness=1, font=("calibri", 13), bg="white", relief=GROOVE, wrap=WORD, bd=0)
@@ -39,12 +90,12 @@ def screen():
     Entry(textvariable=passcode, width=38, highlightthickness=1, font=("calibri", 13), show="*").place(x=20, y=180)
 
     # Encrypt, Decrypt, and Reset buttons
-    Button(text="Encrypt", height=2, width=22, bg="lightgreen", fg="black", bd=0).place(x=20, y=230)
-    Button(text="Decrypt", height=2, width=22, bg="lightblue", fg="black", bd=0).place(x=206, y=230)
-    Button(text="Reset", height=2, width=48, bg="lightcoral", fg="black", bd=0).place(x=22, y=275)
+    Button(text="Encrypt", height=2, width=22, bg="lightgreen", fg="black", bd=0, command=encryption).place(x=20, y=230)
+    Button(text="Decrypt", height=2, width=22, bg="lightblue", fg="black", bd=0, command=decryption).place(x=206, y=230)
+    Button(text="Reset", height=2, width=48, bg="lightcoral", fg="black", bd=0, command=reset_machine).place(x=22, y=275)
 
     # Run the application
-    screen.mainloop()
+    machine_screen.mainloop()
 # Display screen function when run is clicked
-screen()
+machine_screen()
 
