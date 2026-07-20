@@ -31,7 +31,7 @@ def encryption():
         encrypted_text = bytes.decode("ascii")
 
         # Display encrypted text on the screen
-        Label(encrypt_screen, text=" Encrypted Text:", font=("calibri", 13), fg="black", bg="lightgreen").place(x=20, y=20)
+        Label(encrypt_screen, text="Encrypted Text:", font=("calibri", 13), fg="black", bg="lightgreen").place(x=20, y=20)
         encrypted_output = Text(encrypt_screen, font=("calibri", 13), bg="white", relief=GROOVE, wrap=WORD, bd=0)
         encrypted_output.place(x=25, y=55, width=170, height=75)
         encrypted_output.insert(END, encrypted_text)
@@ -47,13 +47,40 @@ def encryption():
     elif secret_key != "CSI3480":
         messagebox.showerror("ERROR", "Incorrect Password. Please try again.")
 
-
-
-
-
 # Function for decrypting the text
 def decryption():
-    print("")
+    # Get the passcode entered by user
+    secret_key = passcode.get()
+
+    if secret_key == "CSI3480":
+        # Encryption screen
+        decrypt_screen = Toplevel(machine_screen)
+        decrypt_screen.title("Decrypted Text")
+        decrypt_screen.geometry("250x200")
+        decrypt_screen.configure(bg="lightblue")
+
+        # Decrypt the text entered by user
+        msg = first_text.get(1.0, END)
+        decoded_msg = msg.encode("ascii")
+        bytes = base64.b64decode(decoded_msg)
+        decrypted_text = bytes.decode("ascii")
+
+        # Display decrypted text on the screen
+        Label(decrypt_screen, text="Decrypted Text:", font=("calibri", 13), fg="black", bg="lightblue").place(x=20, y=20)
+        decrypted_output = Text(decrypt_screen, font=("calibri", 13), bg="white", relief=GROOVE, wrap=WORD, bd=0)
+        decrypted_output.place(x=25, y=55, width=170, height=75)
+        decrypted_output.insert(END, decrypted_text)
+
+        # Scrollbar for decrypted textbox
+        de_scrollbar = Scrollbar(decrypted_output, orient=VERTICAL, command=decrypted_output.yview)
+        decrypted_output.configure(yscrollcommand=de_scrollbar.set)
+        de_scrollbar.pack(side=RIGHT, fill=Y)
+
+    elif secret_key == "":
+        messagebox.showerror("ERROR", "Please input a password to continue.")
+
+    elif secret_key != "CSI3480":
+        messagebox.showerror("ERROR", "Incorrect Password. Please try again.")
 
 # Main GUI Screen for Cipher Machine Tool
 def machine_screen():
