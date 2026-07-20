@@ -19,28 +19,39 @@ def encryption():
 
     # Check is password is correct
     if secret_key == "CSI3480":
-        # Encryption screen
-        encrypt_screen = Toplevel(machine_screen)
-        encrypt_screen.title("Encrypted Text")
-        encrypt_screen.geometry("250x200")
-        encrypt_screen.configure(bg="lightgreen")
-
-        # Encrypt the text entered by user
+        # The text entered by user
         msg = first_text.get(1.0, END)
-        encoded_msg = msg.encode("ascii")
-        bytes = base64.b64encode(encoded_msg)
-        encrypted_text = bytes.decode("ascii")
 
-        # Display encrypted text on the screen
-        Label(encrypt_screen, text="Encrypted Text:", font=("calibri", 13), fg="black", bg="lightgreen").place(x=20, y=20)
-        encrypted_output = Text(encrypt_screen, font=("calibri", 13), bg="white", relief=GROOVE, wrap=WORD, bd=0)
-        encrypted_output.place(x=25, y=55, width=170, height=75)
-        encrypted_output.insert(END, encrypted_text)
+        # Check is message is empty
+        if len(msg.strip()) == 0:
+            # If message is empty, display error message
+            messagebox.showerror("ERROR", "Please enter a text to encrypt.")
+        else:
+            # Encryption screen
+            encrypt_screen = Toplevel(machine_screen)
+            encrypt_screen.title("Encrypted Text")
+            encrypt_screen.geometry("250x200")
+            encrypt_screen.configure(bg="lightgreen")
 
-        # Scrollbar for encypted textbox
-        en_scrollbar = Scrollbar(encrypted_output, orient=VERTICAL, command=encrypted_output.yview)
-        encrypted_output.configure(yscrollcommand=en_scrollbar.set)
-        en_scrollbar.pack(side=RIGHT, fill=Y)
+            # Favicon
+            favicon = PhotoImage(file="favicon.png")
+            encrypt_screen.iconphoto(False, favicon)
+
+            # Encrypt the text entered by user
+            encoded_msg = msg.encode("ascii")
+            bytes = base64.b64encode(encoded_msg)
+            encrypted_text = bytes.decode("ascii")
+
+            # Display encrypted text on the screen
+            Label(encrypt_screen, text="Encrypted Text:", font=("calibri", 13), fg="black", bg="lightgreen").place(x=20, y=20)
+            encrypted_output = Text(encrypt_screen, font=("calibri", 13), bg="white", relief=GROOVE, wrap=WORD, bd=0)
+            encrypted_output.place(x=25, y=55, width=170, height=75)
+            encrypted_output.insert(END, encrypted_text)
+
+            # Scrollbar for encypted textbox
+            en_scrollbar = Scrollbar(encrypted_output, orient=VERTICAL, command=encrypted_output.yview)
+            encrypted_output.configure(yscrollcommand=en_scrollbar.set)
+            en_scrollbar.pack(side=RIGHT, fill=Y)
 
 
     # Warning messages for empty or incorrect password
@@ -60,16 +71,23 @@ def decryption():
         # The text entered by user
         msg = first_text.get(1.0, END)
         
-        # The encrypted text must be a multiple of 4 to be a valid encrypted text.
+        # Check whether the message is empty or not a multiple of 4
         if len(msg.strip()) % 4 != 0:
             # If message is not a multiple of 4, display error message
             messagebox.showerror("ERROR", "Invalid input. Please enter a valid encrypted text.")
+        elif len(msg.strip()) == 0:
+            # If message is empty, display error message
+            messagebox.showerror("ERROR", "Please enter a text to decrypt.")
         else:
             # Decryption screen
             decrypt_screen = Toplevel(machine_screen)
             decrypt_screen.title("Decrypted Text")
             decrypt_screen.geometry("250x200")
             decrypt_screen.configure(bg="lightblue")
+
+            # Favicon
+            favicon = PhotoImage(file="favicon.png")
+            decrypt_screen.iconphoto(False, favicon)
 
             # Decrypt the text entered by user
             decoded_msg = msg.encode("ascii")
@@ -101,7 +119,7 @@ def machine_screen():
 
     # Main window screen title and size (using Tkinter)
     machine_screen = Tk()
-    machine_screen.geometry("400x400")
+    machine_screen.geometry("387x355")
     machine_screen.title("Cipher Machine")
     
     # Favicon
@@ -116,7 +134,7 @@ def machine_screen():
     # Textbox for user input
     Label(text="Enter Text:", fg="black", font=("calibri", 13)).place(x=20, y=20)
     first_text = Text(highlightthickness=1, font=("calibri", 13), bg="white", relief=GROOVE, wrap=WORD, bd=0)
-    first_text.place(x=20, y=50, width=355, height=75)
+    first_text.place(x=20, y=50, width=351, height=75)
     
     # Scrollbar for the textbox
     scrollbar = Scrollbar(first_text, orient=VERTICAL, command=first_text.yview)
