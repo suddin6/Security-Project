@@ -13,19 +13,20 @@ from tkinter import messagebox
 import base64
 import os
 
+# Encrypted and decrypted text outputs 
 encrypted_text = ""
 decrypted_text = ""
 
 # Function for encrypting the text
 def encryption():
+    # Global variables
     global encrypted_text, mode
 
+    # Toggle to know which button was clicked
     mode = "encrypt"
 
     # Get the passcode entered by user
     secret_key = passcode.get()
-
-    encrypted_text = ""
 
     # Check is password is correct
     if secret_key == "CSI3480":
@@ -72,14 +73,14 @@ def encryption():
 
 # Function for decrypting the text
 def decryption():
+    # Global variables
     global decrypted_text, mode
 
+    # Toggle to know which button was clicked
     mode = "decrypt"
 
     # Get the passcode entered by user
     secret_key = passcode.get()
-
-    decrypted_text = ""
 
     # Check is password is correct
     if secret_key == "CSI3480":
@@ -127,23 +128,29 @@ def decryption():
     elif secret_key != "CSI3480":
         messagebox.showerror("ERROR", "Incorrect Password. Please try again.")
 
+# Function to save messages to a text file
 def save_text():
     try:
+        # If file does not exist, create one
         if not os.path.exists("saved_msgs.txt"):
             with open("saved_msgs.txt", "w") as file:
                 file.write("Here are your saved messages:\n")
             messagebox.showinfo("SUCCESS", "File has been created! Please click the save button once more!")
         else:
+            # If encrypt button was clicked, write the encrypted message to file
             if mode == "encrypt":
                 with open("saved_msgs.txt", "a") as file:
                     file.write("Encrypted Text: " + encrypted_text + "\n")
             
+            # If decrypt button was clicked, write the decrypted message to file
             elif mode == "decrypt":
                 with open("saved_msgs.txt", "a") as file:
                     file.write("Decrypted Text: " + decrypted_text + "\n")
     
+            # Show success message to user
             messagebox.showinfo("SUCCESS", "Text saved to file successfully!")
 
+    # Display error if any
     except Exception as error:
         messagebox.showerror("ERROR", f"An error occurred: {str(error)}")
 
