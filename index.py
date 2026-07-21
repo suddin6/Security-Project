@@ -18,14 +18,35 @@ import os
 encrypted_text = ""
 decrypted_text = ""
 
+# Variables to store passwords
 create_pw = ""
 change_pw = ""
 old_pw = ""
 
+# Encrypt and Decrypt screens
+encrypt_screen = ""
+decrypt_screen = ""
+
+# Function to copy encrypted text
+def copy_encrypt():
+    # Global variables
+    global e_copy_toggle, encrypt_screen, encrypted_text
+
+    # If copy in encryption clicked, show success message
+    if e_copy_toggle == True:
+        messagebox.showinfo("SUCCESS", "Text has been copied successfully!")
+    
+    # Copy the text and update screen
+    encrypt_screen.clipboard_clear()
+    encrypt_screen.clipboard_append(
+        encrypted_text.strip()
+    )
+    encrypt_screen.update()
+
 # Function for encrypting the text
 def encryption():
     # Global variables
-    global encrypted_text, mode
+    global encrypted_text, mode, encrypt_screen, e_copy_toggle
 
     # Toggle to know which button was clicked
     mode = "encrypt"
@@ -57,12 +78,12 @@ def encryption():
             # Encrypt the text entered by user
             encoded_msg = msg.encode("ascii")
             bytes = base64.b64encode(encoded_msg)
-            encrypted_text += bytes.decode("ascii")
+            encrypted_text = bytes.decode("ascii")
 
             # Display encrypted text on the screen
             Label(encrypt_screen, text="Encrypted Text:", font=("calibri", 13), fg="black", bg="plum").place(x=20, y=20)
             encrypted_output = Text(encrypt_screen, font=("calibri", 13), bg="white", relief=GROOVE, wrap=WORD, bd=0)
-            encrypted_output.place(x=25, y=55, width=170, height=75)
+            encrypted_output.place(x=25, y=55, width=200, height=75)
             encrypted_output.delete(1.0, END)
             encrypted_output.insert(END, encrypted_text)
             encrypted_output.configure(state=DISABLED)  # Read-Only
@@ -71,16 +92,38 @@ def encryption():
             en_scrollbar = Scrollbar(encrypted_output, orient=VERTICAL, command=encrypted_output.yview)
             encrypted_output.configure(yscrollcommand=en_scrollbar.set)
             en_scrollbar.pack(side=RIGHT, fill=Y)
+
+            # Check whether copy button was clicked
+            e_copy_toggle = True
+
+            # Button to copy encrypted text
+            Button(encrypt_screen, text="Copy", command=copy_encrypt, bg="blue", fg="white", height=1, width=12).place(x=20, y=150)
     # Warning messages for empty or incorrect password
     elif secret_key == "":
         messagebox.showerror("ERROR", "Please input a password to continue.")
     elif secret_key != create_pw:
         messagebox.showerror("ERROR", "Incorrect Password. Please try again.")
 
+# Function to copy decrypted text
+def copy_decrypt():
+    # Global variables
+    global copy_toggle, decrypt_screen, decrypted_output
+
+    # If copy in decryption clicked, show success message
+    if copy_toggle == True:
+        messagebox.showinfo("SUCCESS", "Text has been copied successfully!")
+
+    # Copy the text and update screen
+    decrypt_screen.clipboard_clear()
+    decrypt_screen.clipboard_append(
+        decrypted_text.strip()
+    )
+    decrypt_screen.update()
+
 # Function for decrypting the text
 def decryption():
     # Global variables
-    global decrypted_text, mode
+    global decrypted_text, mode, decrypt_screen, copy_toggle
 
     # Toggle to know which button was clicked
     mode = "decrypt"
@@ -115,12 +158,12 @@ def decryption():
             # Decrypt the text entered by user
             decoded_msg = msg.encode("ascii")
             bytes = base64.b64decode(decoded_msg)
-            decrypted_text += bytes.decode("ascii")
+            decrypted_text = bytes.decode("ascii")
 
             # Display decrypted text on the screen
             Label(decrypt_screen, text="Decrypted Text:", font=("calibri", 13), fg="black", bg="lightblue").place(x=20, y=20)
             decrypted_output = Text(decrypt_screen, font=("calibri", 13), bg="white", relief=GROOVE, wrap=WORD, bd=0)
-            decrypted_output.place(x=25, y=55, width=170, height=75)
+            decrypted_output.place(x=25, y=55, width=200, height=75)
             decrypted_output.delete(1.0, END)
             decrypted_output.insert(END, decrypted_text)
             decrypted_output.configure(state=DISABLED) # Read-Only
@@ -129,6 +172,12 @@ def decryption():
             de_scrollbar = Scrollbar(decrypted_output, orient=VERTICAL, command=decrypted_output.yview)
             decrypted_output.configure(yscrollcommand=de_scrollbar.set)
             de_scrollbar.pack(side=RIGHT, fill=Y)
+
+            # Check whether copy button was clicked
+            copy_toggle = True
+
+            # Button to copy decrypted text
+            Button(decrypt_screen, text="Copy", command=copy_decrypt, bg="blue", fg="white", height=1, width=12).place(x=20, y=150)
     # Warning messages for empty or incorrect password
     elif secret_key == "":
         messagebox.showerror("ERROR", "Please input a password to continue.")
@@ -218,6 +267,7 @@ def change_password():
     except Exception as error:
         messagebox.showerror("ERROR", f"An error occurred: {str(error)}")
 
+
 # Main GUI Screen for Cipher Machine Tool
 def machine_screen():
     # Global variables to use across all functions
@@ -256,7 +306,7 @@ def machine_screen():
     passcode = StringVar()
     Entry(textvariable=passcode, width=38, highlightthickness=1, font=("calibri", 13), show="*").place(x=20, y=180)
 
-    # Encrypt, Decrypt, Reset, and Save buttons
+    # Change Password, Encrypt, Decrypt, Reset, and Save buttons
     Button(text="Change Password", height=1, width=13, bg="beige", fg="black", bd=0, command=change_password).place(x=270, y=210)
     Button(text="Encrypt", height=2, width=22, bg="plum", fg="black", bd=0, command=encryption).place(x=20, y=240)
     Button(text="Decrypt", height=2, width=22, bg="lightblue", fg="black", bd=0, command=decryption).place(x=206, y=240)
