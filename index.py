@@ -7,15 +7,25 @@ Due: August 13, 2026
 Description: An encryption-decryption tool that utilizes a GUI interface and allows for secure messaging!
 '''
 
+# Importing from tkinter library (GUI), base64 (encryption + decryption), and os (file handling)
 from tkinter import *
 from tkinter import messagebox
 import base64
 import os
 
+encrypted_text = ""
+decrypted_text = ""
+
 # Function for encrypting the text
 def encryption():
+    global encrypted_text, mode
+
+    mode = "encrypt"
+
     # Get the passcode entered by user
     secret_key = passcode.get()
+
+    encrypted_text = ""
 
     # Check is password is correct
     if secret_key == "CSI3480":
@@ -31,7 +41,7 @@ def encryption():
             encrypt_screen = Toplevel(machine_screen)
             encrypt_screen.title("Encrypted Text")
             encrypt_screen.geometry("250x200")
-            encrypt_screen.configure(bg="lightgreen")
+            encrypt_screen.configure(bg="plum")
 
             # Favicon
             favicon = PhotoImage(file="favicon.png")
@@ -40,12 +50,13 @@ def encryption():
             # Encrypt the text entered by user
             encoded_msg = msg.encode("ascii")
             bytes = base64.b64encode(encoded_msg)
-            encrypted_text = bytes.decode("ascii")
+            encrypted_text += bytes.decode("ascii")
 
             # Display encrypted text on the screen
-            Label(encrypt_screen, text="Encrypted Text:", font=("calibri", 13), fg="black", bg="lightgreen").place(x=20, y=20)
+            Label(encrypt_screen, text="Encrypted Text:", font=("calibri", 13), fg="black", bg="plum").place(x=20, y=20)
             encrypted_output = Text(encrypt_screen, font=("calibri", 13), bg="white", relief=GROOVE, wrap=WORD, bd=0)
             encrypted_output.place(x=25, y=55, width=170, height=75)
+            encrypted_output.delete(1.0, END)
             encrypted_output.insert(END, encrypted_text)
             encrypted_output.configure(state=DISABLED)  # Read-Only
 
@@ -53,19 +64,22 @@ def encryption():
             en_scrollbar = Scrollbar(encrypted_output, orient=VERTICAL, command=encrypted_output.yview)
             encrypted_output.configure(yscrollcommand=en_scrollbar.set)
             en_scrollbar.pack(side=RIGHT, fill=Y)
-
-
     # Warning messages for empty or incorrect password
     elif secret_key == "":
         messagebox.showerror("ERROR", "Please input a password to continue.")
-
     elif secret_key != "CSI3480":
         messagebox.showerror("ERROR", "Incorrect Password. Please try again.")
 
 # Function for decrypting the text
 def decryption():
+    global decrypted_text, mode
+
+    mode = "decrypt"
+
     # Get the passcode entered by user
     secret_key = passcode.get()
+
+    decrypted_text = ""
 
     # Check is password is correct
     if secret_key == "CSI3480":
@@ -93,12 +107,13 @@ def decryption():
             # Decrypt the text entered by user
             decoded_msg = msg.encode("ascii")
             bytes = base64.b64decode(decoded_msg)
-            decrypted_text = bytes.decode("ascii")
+            decrypted_text += bytes.decode("ascii")
 
             # Display decrypted text on the screen
             Label(decrypt_screen, text="Decrypted Text:", font=("calibri", 13), fg="black", bg="lightblue").place(x=20, y=20)
             decrypted_output = Text(decrypt_screen, font=("calibri", 13), bg="white", relief=GROOVE, wrap=WORD, bd=0)
             decrypted_output.place(x=25, y=55, width=170, height=75)
+            decrypted_output.delete(1.0, END)
             decrypted_output.insert(END, decrypted_text)
             decrypted_output.configure(state=DISABLED) # Read-Only
 
@@ -106,22 +121,40 @@ def decryption():
             de_scrollbar = Scrollbar(decrypted_output, orient=VERTICAL, command=decrypted_output.yview)
             decrypted_output.configure(yscrollcommand=de_scrollbar.set)
             de_scrollbar.pack(side=RIGHT, fill=Y)
-
     # Warning messages for empty or incorrect password
     elif secret_key == "":
         messagebox.showerror("ERROR", "Please input a password to continue.")
-
     elif secret_key != "CSI3480":
         messagebox.showerror("ERROR", "Incorrect Password. Please try again.")
+
+def save_text():
+    try:
+        if not os.path.exists("saved_msgs.txt"):
+            with open("saved_msgs.txt", "w") as file:
+                file.write("Here are your saved messages:\n")
+            messagebox.showinfo("SUCCESS", "File has been created! Please click the save button once more!")
+        else:
+            if mode == "encrypt":
+                with open("saved_msgs.txt", "a") as file:
+                    file.write("Encrypted Text: " + encrypted_text + "\n")
+            
+            elif mode == "decrypt":
+                with open("saved_msgs.txt", "a") as file:
+                    file.write("Decrypted Text: " + decrypted_text + "\n")
+    
+            messagebox.showinfo("SUCCESS", "Text saved to file successfully!")
+
+    except Exception as error:
+        messagebox.showerror("ERROR", f"An error occurred: {str(error)}")
 
 # Main GUI Screen for Cipher Machine Tool
 def machine_screen():
     # Global variables to use across all functions
-    global machine_screen, passcode, first_text
+    global machine_screen, passcode, first_text, encrypted_button, decrypted_button
 
     # Main window screen title and size (using Tkinter)
     machine_screen = Tk()
-    machine_screen.geometry("387x355")
+    machine_screen.geometry("387x375")
     machine_screen.title("Cipher Machine")
     
     # Favicon
@@ -148,13 +181,13 @@ def machine_screen():
     passcode = StringVar()
     Entry(textvariable=passcode, width=38, highlightthickness=1, font=("calibri", 13), show="*").place(x=20, y=180)
 
-    # Encrypt, Decrypt, and Reset buttons
-    Button(text="Encrypt", height=2, width=22, bg="lightgreen", fg="black", bd=0, command=encryption).place(x=20, y=230)
-    Button(text="Decrypt", height=2, width=22, bg="lightblue", fg="black", bd=0, command=decryption).place(x=206, y=230)
+    # Encrypt, Decrypt, Reset, and Save buttons
+    encrypted_button = Button(text="Encrypt", height=2, width=22, bg="plum", fg="black", bd=0, command=encryption).place(x=20, y=230)
+    decrypted_button = Button(text="Decrypt", height=2, width=22, bg="lightblue", fg="black", bd=0, command=decryption).place(x=206, y=230)
     Button(text="Reset", height=2, width=48, bg="lightcoral", fg="black", bd=0, command=reset_machine).place(x=22, y=275)
+    Button(text="Save", height=2, width=48, bg="DarkOliveGreen1", fg="black", bd=0, command=save_text).place(x=22, y=320)
 
     # Run the application
     machine_screen.mainloop()
-
 # Display screen function when run is clicked
 machine_screen()
