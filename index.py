@@ -159,31 +159,45 @@ def save_text():
     except Exception as error:
         messagebox.showerror("ERROR", f"An error occurred: {str(error)}")
 
+# Function to track the password
 def save_password():
+    # Global variables
     global create_pw, old_pw, change_pw
+
     try:
+        # Execute this code if file does not exist or is empty
         if not os.path.exists("passwords.txt") or os.path.getsize("passwords.txt") == 0:
+            # Ask user to create password
             create_pw = simpledialog.askstring("PASSWORD", "Please create a password to continue:")
+            # No empty submissions
             if create_pw == "":
                 messagebox.showinfo("ERROR", "Please do not leave the field blank.")
+            # Write and save password to text file
             with open("passwords.txt", "w") as file:
                 file.write(create_pw)
-            messagebox.showinfo("SUCCESS", "Password has been saved")
+            messagebox.showinfo("SUCCESS", "Password has been saved.")
         else:
+            # Read password from file
             with open("passwords.txt", "r") as file:
                 create_pw = file.read().strip()
+    # Display an errors
     except Exception as error:
         messagebox.showerror("ERROR", f"An error occurred: {str(error)}")
 
+# Function to change passwords
 def change_password():
+    # Global variables
     global create_pw, old_pw, change_pw
+
     try:
+        # Only allow changing if file exists
         if os.path.exists("passwords.txt"):
             change_pw = messagebox.askyesno("PASSWORD", "Would you like to change your password?")
             if change_pw == True:
                 old_pw = simpledialog.askstring("OLD PASSWORD", "Please enter your old password: ")
                 if old_pw is None:
                     return
+                # Check if old password is known by user
                 if old_pw == create_pw:
                     new_pw = simpledialog.askstring("NEW PASSWORD", "Please enter your new password: ")
                     if new_pw is None:
@@ -191,25 +205,28 @@ def change_password():
                     elif new_pw == "":
                         messagebox.showinfo("ERROR", "Please do not leave the field blank.")
                         return
+                    # Write new password into file and override old one
                     with open("passwords.txt", "w") as file:
                         create_pw = new_pw
                         file.write(create_pw)
                     messagebox.showinfo("SUCCESS", "Password has been saved.")
                 elif old_pw != create_pw:
                     messagebox.showinfo("ERROR", "Your password is incorrect. Please try again")
+    # Display errors to user
     except Exception as error:
         messagebox.showerror("ERROR", f"An error occurred: {str(error)}")
 
 # Main GUI Screen for Cipher Machine Tool
 def machine_screen():
     # Global variables to use across all functions
-    global machine_screen, passcode, first_text, encrypted_button, decrypted_button
+    global machine_screen, passcode, first_text
 
+    # Call the save_password function to allow a user to create a password
     save_password()
 
     # Main window screen title and size (using Tkinter)
     machine_screen = Tk()
-    machine_screen.geometry("387x375")
+    machine_screen.geometry("387x387")
     machine_screen.title("Cipher Machine")
     
     # Favicon
@@ -237,7 +254,7 @@ def machine_screen():
     Entry(textvariable=passcode, width=38, highlightthickness=1, font=("calibri", 13), show="*").place(x=20, y=180)
 
     # Encrypt, Decrypt, Reset, and Save buttons
-    Button(text="Change Password", height=1, width=13, bg="lightpink", fg="black", bd=0, command=change_password).place(x=270, y=210)
+    Button(text="Change Password", height=1, width=13, bg="beige", fg="black", bd=0, command=change_password).place(x=270, y=210)
     Button(text="Encrypt", height=2, width=22, bg="plum", fg="black", bd=0, command=encryption).place(x=20, y=240)
     Button(text="Decrypt", height=2, width=22, bg="lightblue", fg="black", bd=0, command=decryption).place(x=206, y=240)
     Button(text="Reset", height=2, width=48, bg="lightcoral", fg="black", bd=0, command=reset_machine).place(x=22, y=285)
