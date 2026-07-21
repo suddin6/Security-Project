@@ -47,6 +47,7 @@ def encryption():
             encrypt_screen = Toplevel(machine_screen)
             encrypt_screen.title("Encrypted Text")
             encrypt_screen.geometry("250x200")
+            encrypt_screen.resizable(0,0)
             encrypt_screen.configure(bg="plum")
 
             # Favicon
@@ -104,6 +105,7 @@ def decryption():
             decrypt_screen = Toplevel(machine_screen)
             decrypt_screen.title("Decrypted Text")
             decrypt_screen.geometry("250x200")
+            decrypt_screen.resizable(0,0)
             decrypt_screen.configure(bg="lightblue")
 
             # Favicon
@@ -227,6 +229,7 @@ def machine_screen():
     # Main window screen title and size (using Tkinter)
     machine_screen = Tk()
     machine_screen.geometry("387x387")
+    machine_screen.resizable(0,0)
     machine_screen.title("Cipher Machine")
     
     # Favicon

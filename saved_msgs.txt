@@ -3,3 +3,6 @@ Encrypted Text: SGVsbG8K
 Decrypted Text: Hello
 
 Encrypted Text: SGVsbG8K
+Encrypted Text: aGkK
+Decrypted Text: hi
+
