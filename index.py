@@ -10,6 +10,7 @@ Description: An encryption-decryption tool that utilizes a GUI interface and all
 # Importing from tkinter library (GUI), base64 (encryption + decryption), and os (file handling)
 from tkinter import *
 from tkinter import messagebox
+from tkinter import simpledialog
 import base64
 import os
 
@@ -28,12 +29,12 @@ def encryption():
     # Get the passcode entered by user
     secret_key = passcode.get()
 
-    # Check is password is correct
-    if secret_key == "CSI3480":
+    # Check if password is correct
+    if secret_key == create_pw:
         # The text entered by user
         msg = first_text.get(1.0, END)
 
-        # Check is message is empty
+        # Check if message is empty
         if len(msg.strip()) == 0:
             # If message is empty, display error message
             messagebox.showerror("ERROR", "Please enter a text to encrypt.")
@@ -68,7 +69,7 @@ def encryption():
     # Warning messages for empty or incorrect password
     elif secret_key == "":
         messagebox.showerror("ERROR", "Please input a password to continue.")
-    elif secret_key != "CSI3480":
+    elif secret_key != create_pw:
         messagebox.showerror("ERROR", "Incorrect Password. Please try again.")
 
 # Function for decrypting the text
@@ -82,8 +83,8 @@ def decryption():
     # Get the passcode entered by user
     secret_key = passcode.get()
 
-    # Check is password is correct
-    if secret_key == "CSI3480":
+    # Check if password is correct
+    if secret_key == create_pw:
         # The text entered by user
         msg = first_text.get(1.0, END)
         
@@ -125,7 +126,7 @@ def decryption():
     # Warning messages for empty or incorrect password
     elif secret_key == "":
         messagebox.showerror("ERROR", "Please input a password to continue.")
-    elif secret_key != "CSI3480":
+    elif secret_key != create_pw:
         messagebox.showerror("ERROR", "Incorrect Password. Please try again.")
 
 # Function to save messages to a text file
@@ -157,7 +158,10 @@ def save_text():
 # Main GUI Screen for Cipher Machine Tool
 def machine_screen():
     # Global variables to use across all functions
-    global machine_screen, passcode, first_text, encrypted_button, decrypted_button
+    global machine_screen, passcode, first_text, encrypted_button, decrypted_button, create_pw
+
+    # Allow the user to create their own password
+    create_pw = simpledialog.askstring("Password","Please create a password to continue:")
 
     # Main window screen title and size (using Tkinter)
     machine_screen = Tk()
