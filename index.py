@@ -11,6 +11,7 @@ Description: An encryption-decryption tool that utilizes a GUI interface and all
 from tkinter import *
 from tkinter import messagebox
 from tkinter import simpledialog
+from tkinter import filedialog
 import base64
 import os
 
@@ -267,6 +268,22 @@ def change_password():
     except Exception as error:
         messagebox.showerror("ERROR", f"An error occurred: {str(error)}")
 
+# Function to import a file
+def import_file():
+    # Global variables
+    global first_text
+
+    # Retreiving text file from user
+    path = filedialog.askopenfilename(title="Select a file", filetypes=[("Text files", "*.txt")])
+    
+    # If the path exists/is correct, read the contents and put it in the textbox
+    if path:
+        with open(path, "r") as file:
+            first_text.delete(1.0, END)
+            file_contents = file.read().strip()
+            first_text.insert(END, file_contents)
+        # Display success message
+        messagebox.showinfo("SUCCESS", "You have successfully imported a file!")
 
 # Main GUI Screen for Cipher Machine Tool
 def machine_screen():
@@ -278,8 +295,8 @@ def machine_screen():
 
     # Main window screen title and size (using Tkinter)
     machine_screen = Tk()
-    machine_screen.geometry("387x387")
-    machine_screen.resizable(0,0)
+    machine_screen.geometry("387x410")
+    machine_screen.resizable(0,0) # Disables maximize button
     machine_screen.title("Cipher Machine")
     
     # Favicon
@@ -306,12 +323,13 @@ def machine_screen():
     passcode = StringVar()
     Entry(textvariable=passcode, width=38, highlightthickness=1, font=("calibri", 13), show="*").place(x=20, y=180)
 
-    # Change Password, Encrypt, Decrypt, Reset, and Save buttons
+    # Change Password, Encrypt, Decrypt, Reset, Save, and Import File buttons
     Button(text="Change Password", height=1, width=13, bg="beige", fg="black", bd=0, command=change_password).place(x=270, y=210)
     Button(text="Encrypt", height=2, width=22, bg="plum", fg="black", bd=0, command=encryption).place(x=20, y=240)
     Button(text="Decrypt", height=2, width=22, bg="lightblue", fg="black", bd=0, command=decryption).place(x=206, y=240)
     Button(text="Reset", height=2, width=48, bg="lightcoral", fg="black", bd=0, command=reset_machine).place(x=22, y=285)
     Button(text="Save", height=2, width=48, bg="DarkOliveGreen1", fg="black", bd=0, command=save_text).place(x=22, y=330)
+    Button(text="Import File", height=1, width=10, bg="lightgray", fg="black", bd=0, command=import_file).place(x=160, y=375)
 
     # Run the application
     machine_screen.mainloop()
