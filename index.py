@@ -77,9 +77,9 @@ def encryption():
             encrypt_screen.iconphoto(False, favicon)
 
             # Encrypt the text entered by user
-            encoded_msg = msg.encode("ascii")
+            encoded_msg = msg.encode("utf-8")
             bytes = base64.b64encode(encoded_msg)
-            encrypted_text = bytes.decode("ascii")
+            encrypted_text = bytes.decode("utf-8")
 
             # Display encrypted text on the screen
             Label(encrypt_screen, text="Encrypted Text:", font=("calibri", 13), fg="black", bg="plum").place(x=20, y=20)
@@ -157,9 +157,9 @@ def decryption():
             decrypt_screen.iconphoto(False, favicon)
 
             # Decrypt the text entered by user
-            decoded_msg = msg.encode("ascii")
+            decoded_msg = msg.encode("utf-8")
             bytes = base64.b64decode(decoded_msg)
-            decrypted_text = bytes.decode("ascii")
+            decrypted_text = bytes.decode("utf-8")
 
             # Display decrypted text on the screen
             Label(decrypt_screen, text="Decrypted Text:", font=("calibri", 13), fg="black", bg="lightblue").place(x=20, y=20)
