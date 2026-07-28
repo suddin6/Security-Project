@@ -14,6 +14,7 @@ from tkinter import simpledialog
 from tkinter import filedialog
 import base64
 import os
+import tkinter.font as tkfont
 
 # Encrypted and decrypted text outputs 
 encrypted_text = ""
@@ -46,60 +47,58 @@ def copy_encrypt():
 
 # Function for encrypting the text
 def encryption():
-    # Global variables
     global encrypted_text, mode, encrypt_screen, e_copy_toggle
 
-    # Toggle to know which button was clicked
     mode = "encrypt"
-
-    # Get the passcode entered by user
     secret_key = passcode.get()
 
-    # Check if password is correct
     if secret_key == create_pw:
-        # The text entered by user
         msg = first_text.get(1.0, END)
 
-        # Check if message is empty
         if len(msg.strip()) == 0:
-            # If message is empty, display error message
             messagebox.showerror("ERROR", "Please enter a text to encrypt.")
         else:
-            # Encryption screen
             encrypt_screen = Toplevel(machine_screen)
             encrypt_screen.title("Encrypted Text")
-            encrypt_screen.geometry("250x200")
-            encrypt_screen.resizable(0,0)
+            encrypt_screen.geometry("280x220")
+            encrypt_screen.minsize(220, 180)
             encrypt_screen.configure(bg="plum")
 
-            # Favicon
             favicon = PhotoImage(file="favicon.png")
             encrypt_screen.iconphoto(False, favicon)
 
-            # Encrypt the text entered by user
+            encrypt_screen.columnconfigure(0, weight=1)
+            encrypt_screen.rowconfigure(1, weight=1)
+
             encoded_msg = msg.encode("utf-8")
             bytes = base64.b64encode(encoded_msg)
             encrypted_text = bytes.decode("utf-8")
 
-            # Display encrypted text on the screen
-            Label(encrypt_screen, text="Encrypted Text:", font=("calibri", 13), fg="black", bg="plum").place(x=20, y=20)
-            encrypted_output = Text(encrypt_screen, font=("calibri", 13), bg="white", relief=GROOVE, wrap=WORD, bd=0)
-            encrypted_output.place(x=25, y=55, width=200, height=75)
+            Label(encrypt_screen, text="Encrypted Text:", font=fixed_font, fg="black", bg="plum").grid(
+                row=0, column=0, sticky="w", padx=15, pady=(15, 0)
+            )
+
+            # Row 1: text box + scrollbar, in their own frame
+            output_frame = Frame(encrypt_screen)
+            output_frame.grid(row=1, column=0, sticky="nsew", padx=15, pady=5)
+            output_frame.columnconfigure(0, weight=1)
+            output_frame.rowconfigure(0, weight=1)
+
+            encrypted_output = Text(output_frame, font=fixed_font, bg="white", relief=GROOVE, wrap=WORD, bd=0)
+            encrypted_output.grid(row=0, column=0, sticky="nsew")
             encrypted_output.delete(1.0, END)
             encrypted_output.insert(END, encrypted_text)
-            encrypted_output.configure(state=DISABLED)  # Read-Only
+            encrypted_output.configure(state=DISABLED)
 
-            # Scrollbar for encypted textbox
-            en_scrollbar = Scrollbar(encrypted_output, orient=VERTICAL, command=encrypted_output.yview)
+            en_scrollbar = Scrollbar(output_frame, orient=VERTICAL, command=encrypted_output.yview)
+            en_scrollbar.grid(row=0, column=1, sticky="ns")
             encrypted_output.configure(yscrollcommand=en_scrollbar.set)
-            en_scrollbar.pack(side=RIGHT, fill=Y)
 
-            # Check whether copy button was clicked
             e_copy_toggle = True
 
-            # Button to copy encrypted text
-            Button(encrypt_screen, text="Copy", command=copy_encrypt, bg="blue", fg="white", height=1, width=12).place(x=20, y=150)
-    # Warning messages for empty or incorrect password
+            Button(encrypt_screen, text="Copy", command=copy_encrypt, bg="blue", fg="white", font=btn_fixed_font).grid(
+                row=2, column=0, sticky="w", padx=15, pady=(5, 15)
+            )
     elif secret_key == "":
         messagebox.showerror("ERROR", "Please input a password to continue.")
     elif secret_key != create_pw:
@@ -123,63 +122,61 @@ def copy_decrypt():
 
 # Function for decrypting the text
 def decryption():
-    # Global variables
     global decrypted_text, mode, decrypt_screen, copy_toggle
 
-    # Toggle to know which button was clicked
     mode = "decrypt"
-
-    # Get the passcode entered by user
     secret_key = passcode.get()
 
-    # Check if password is correct
     if secret_key == create_pw:
-        # The text entered by user
         msg = first_text.get(1.0, END)
-        
-        # Check whether the message is empty or not a multiple of 4
+
         if len(msg.strip()) % 4 != 0:
-            # If message is not a multiple of 4, display error message
             messagebox.showerror("ERROR", "Invalid input. Please enter a valid encrypted text.")
         elif len(msg.strip()) == 0:
-            # If message is empty, display error message
             messagebox.showerror("ERROR", "Please enter a text to decrypt.")
         else:
-            # Decryption screen
             decrypt_screen = Toplevel(machine_screen)
             decrypt_screen.title("Decrypted Text")
-            decrypt_screen.geometry("250x200")
-            decrypt_screen.resizable(0,0)
+            decrypt_screen.geometry("280x220")
+            decrypt_screen.minsize(220, 180)
             decrypt_screen.configure(bg="lightblue")
 
-            # Favicon
             favicon = PhotoImage(file="favicon.png")
             decrypt_screen.iconphoto(False, favicon)
 
-            # Decrypt the text entered by user
+            decrypt_screen.columnconfigure(0, weight=1)
+            decrypt_screen.rowconfigure(1, weight=1)
+
             decoded_msg = msg.encode("utf-8")
             bytes = base64.b64decode(decoded_msg)
             decrypted_text = bytes.decode("utf-8")
 
-            # Display decrypted text on the screen
-            Label(decrypt_screen, text="Decrypted Text:", font=("calibri", 13), fg="black", bg="lightblue").place(x=20, y=20)
-            decrypted_output = Text(decrypt_screen, font=("calibri", 13), bg="white", relief=GROOVE, wrap=WORD, bd=0)
-            decrypted_output.place(x=25, y=55, width=200, height=75)
+            Label(decrypt_screen, text="Decrypted Text:", font=fixed_font, fg="black", bg="lightblue").grid(
+                row=0, column=0, sticky="w", padx=15, pady=(15, 0)
+            )
+
+            # Row 1: text box + scrollbar, in their own frame
+            output_frame = Frame(decrypt_screen)
+            output_frame.grid(row=1, column=0, sticky="nsew", padx=15, pady=5)
+            output_frame.columnconfigure(0, weight=1)
+            output_frame.rowconfigure(0, weight=1)
+
+            decrypted_output = Text(output_frame, font=fixed_font, bg="white", relief=GROOVE, wrap=WORD, bd=0)
+            decrypted_output.grid(row=0, column=0, sticky="nsew")
             decrypted_output.delete(1.0, END)
             decrypted_output.insert(END, decrypted_text)
-            decrypted_output.configure(state=DISABLED) # Read-Only
+            decrypted_output.configure(state=DISABLED)
 
-            # Scrollbar for decrypted textbox
-            de_scrollbar = Scrollbar(decrypted_output, orient=VERTICAL, command=decrypted_output.yview)
+            de_scrollbar = Scrollbar(output_frame, orient=VERTICAL, command=decrypted_output.yview)
+            de_scrollbar.grid(row=0, column=1, sticky="ns")
             decrypted_output.configure(yscrollcommand=de_scrollbar.set)
-            de_scrollbar.pack(side=RIGHT, fill=Y)
 
-            # Check whether copy button was clicked
+
             copy_toggle = True
 
-            # Button to copy decrypted text
-            Button(decrypt_screen, text="Copy", command=copy_decrypt, bg="blue", fg="white", height=1, width=12).place(x=20, y=150)
-    # Warning messages for empty or incorrect password
+            Button(decrypt_screen, text="Copy", command=copy_decrypt, bg="blue", fg="white", font=btn_fixed_font).grid(
+                row=2, column=0, sticky="w", padx=15, pady=(5, 15)
+            )
     elif secret_key == "":
         messagebox.showerror("ERROR", "Please input a password to continue.")
     elif secret_key != create_pw:
@@ -287,51 +284,82 @@ def import_file():
 
 # Main GUI Screen for Cipher Machine Tool
 def machine_screen():
-    # Global variables to use across all functions
-    global machine_screen, passcode, first_text
+    global machine_screen, passcode, first_text, fixed_font, btn_fixed_font
 
-    # Call the save_password function to allow a user to create a password
     save_password()
 
-    # Main window screen title and size (using Tkinter)
     machine_screen = Tk()
-    machine_screen.geometry("387x410")
-    machine_screen.resizable(0,0) # Disables maximize button
+    machine_screen.geometry("400x420")
     machine_screen.title("Cipher Machine")
-    
-    # Favicon
+    machine_screen.minsize(320, 380)  # minimum window size
+
+    fixed_font = tkfont.nametofont("TkFixedFont")
+    fixed_font.configure(size=13)
+    btn_fixed_font = tkfont.nametofont("TkFixedFont")
+    btn_fixed_font.configure(size=9)
+
     favicon = PhotoImage(file="favicon.png")
     machine_screen.iconphoto(False, favicon)
-    
-    # Function to reset the text and passcode fields
+
+    machine_screen.columnconfigure(0, weight=1)
+    machine_screen.columnconfigure(1, weight=1)
+    machine_screen.rowconfigure(1, weight=1)  # only the text box row grows vertically
+
     def reset_machine():
         passcode.set("")
         first_text.delete(1.0, END)
 
-    # Textbox for user input
-    Label(text="Enter Text:", fg="black", font=("calibri", 13)).place(x=20, y=20)
-    first_text = Text(highlightthickness=1, font=("calibri", 13), bg="white", relief=GROOVE, wrap=WORD, bd=0)
-    first_text.place(x=20, y=50, width=351, height=75)
-    
-    # Scrollbar for the textbox
-    scrollbar = Scrollbar(first_text, orient=VERTICAL, command=first_text.yview)
+    # Row 0: label
+    Label(text="Enter Text:", fg="black", font=fixed_font).grid(
+        row=0, column=0, columnspan=2, sticky="w", padx=20, pady=(15, 0)
+    )
+
+    # Row 1: text box + scrollbar, in their own frame
+    text_frame = Frame(machine_screen)
+    text_frame.grid(row=1, column=0, columnspan=2, sticky="nsew", padx=20, pady=5)
+    text_frame.columnconfigure(0, weight=1)
+    text_frame.rowconfigure(0, weight=1)
+
+    first_text = Text(text_frame, highlightthickness=1, font=fixed_font, bg="white", relief=GROOVE, wrap=WORD, bd=0, height=4)
+    first_text.grid(row=0, column=0, sticky="nsew")
+
+    scrollbar = Scrollbar(text_frame, orient=VERTICAL, command=first_text.yview)
+    scrollbar.grid(row=0, column=1, sticky="ns")
     first_text.configure(yscrollcommand=scrollbar.set)
-    scrollbar.pack(side=RIGHT, fill=Y)
 
-    # Textbox for password input
-    Label(text="Enter Passcode:", fg="black", font=("calibri", 13)).place(x=20, y=150)
+    # Row 2: passcode label
+    Label(text="Enter Passcode:", fg="black", font=fixed_font).grid(
+        row=2, column=0, columnspan=2, sticky="w", padx=20, pady=(10, 0)
+    )
+
+    # Row 3: passcode entry + button
+    passcode_frame = Frame(machine_screen)
+    passcode_frame.grid(row=3, column=0, columnspan=2, sticky="w", padx=20, pady=5)
+
     passcode = StringVar()
-    Entry(textvariable=passcode, width=38, highlightthickness=1, font=("calibri", 13), show="*").place(x=20, y=180)
+    Entry(passcode_frame, textvariable=passcode, width=25, highlightthickness=1, font=fixed_font, show="*").pack(side=LEFT)
+    Button(passcode_frame, text="Change Password", bg="beige", fg="black", bd=0, font=btn_fixed_font, command=change_password).pack(side=LEFT, padx=(5, 0))
 
-    # Change Password, Encrypt, Decrypt, Reset, Save, and Import File buttons
-    Button(text="Change Password", height=1, width=13, bg="beige", fg="black", bd=0, command=change_password).place(x=270, y=210)
-    Button(text="Encrypt", height=2, width=22, bg="plum", fg="black", bd=0, command=encryption).place(x=20, y=240)
-    Button(text="Decrypt", height=2, width=22, bg="lightblue", fg="black", bd=0, command=decryption).place(x=206, y=240)
-    Button(text="Reset", height=2, width=48, bg="lightcoral", fg="black", bd=0, command=reset_machine).place(x=22, y=285)
-    Button(text="Save", height=2, width=48, bg="DarkOliveGreen1", fg="black", bd=0, command=save_text).place(x=22, y=330)
-    Button(text="Import File", height=1, width=10, bg="lightgray", fg="black", bd=0, command=import_file).place(x=160, y=375)
+    # Row 4: encrypt/decrypt — fixed height (row weight 0), full width
+    Button(text="Encrypt", bg="plum", fg="black", bd=0, font=btn_fixed_font, command=encryption).grid(
+        row=4, column=0, sticky="ew", padx=(20, 5), pady=10, ipady=15
+    )
+    Button(text="Decrypt", bg="lightblue", fg="black", bd=0, font=btn_fixed_font, command=decryption).grid(
+        row=4, column=1, sticky="ew", padx=(5, 20), pady=10, ipady=15
+    )
 
-    # Run the application
+    # Rows 5-7: reset, save, import — fixed height, pinned to bottom since no weight above them
+    Button(text="Reset", bg="lightcoral", fg="black", bd=0, font=btn_fixed_font, command=reset_machine).grid(
+        row=5, column=0, columnspan=2, sticky="ew", padx=20, pady=5, ipady=10
+    )
+    Button(text="Save", bg="DarkOliveGreen1", fg="black", bd=0, font=btn_fixed_font, command=save_text).grid(
+        row=6, column=0, columnspan=2, sticky="ew", padx=20, pady=5, ipady=10
+    )
+    Button(text="Import File", bg="lightgray", fg="black", bd=0, font=btn_fixed_font, command=import_file).grid(
+        row=7, column=0, columnspan=2, sticky="ew", padx=20, pady=(5, 15)
+    )
+
     machine_screen.mainloop()
+
 # Display screen function when run is clicked
 machine_screen()
