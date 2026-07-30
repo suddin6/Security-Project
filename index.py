@@ -7,14 +7,16 @@ Due: August 13, 2026
 Description: An encryption-decryption tool that utilizes a GUI interface and allows for secure messaging!
 '''
 
-# Importing from tkinter library (GUI), base64 (encryption + decryption), and os (file handling)
+# Importing from tkinter library (GUI), base64 (encryption + decryption), os (file handling)
 from tkinter import *
 from tkinter import messagebox
 from tkinter import simpledialog
 from tkinter import filedialog
+from tkinter import ttk
 import base64
 import os
 import tkinter.font as tkfont
+
 
 # Encrypted and decrypted text outputs 
 encrypted_text = ""
@@ -30,15 +32,18 @@ encrypt_screen = ""
 decrypt_screen = ""
 
 # Color scheme
-main_bg = "#1D3121"
-main_text = "white"
+main_bg = "#16241C"
+main_text = "#AAD1B6"
 textbox_bg = "#000000"
-btn_color1 = "plum"
-btn_color2 = "lightblue"
-btn_color3 = "lightcoral"
-btn_color4 = "DarkOliveGreen1"
-btn_color5 = "lightgray"
-btn_color6 = "gray"
+btn_color1 = "#425A4F"
+btn_color2 = "#5E5577"
+btn_color3 = "#815B5B"
+btn_color4 = "#5B6F81"
+btn_color5 = "#7D815B"
+btn_color6 = "#2C332E"
+scrollbar_color = "#2C332E"
+scrollbar_color2 = "black"
+scrollbar_color3 = "#8DB699"
 
 
 # Function to copy encrypted text
@@ -96,7 +101,7 @@ def encryption():
             output_frame.columnconfigure(0, weight=1)
             output_frame.rowconfigure(0, weight=1)
 
-            encrypted_output = Text(output_frame, font=fixed_font, bg="white", relief=GROOVE, wrap=WORD, bd=0)
+            encrypted_output = Text(output_frame, font=fixed_font, bg="white", relief=FLAT, wrap=WORD, bd=0)
             encrypted_output.grid(row=0, column=0, sticky="nsew")
             encrypted_output.delete(1.0, END)
             encrypted_output.insert(END, encrypted_text)
@@ -173,7 +178,7 @@ def decryption():
             output_frame.columnconfigure(0, weight=1)
             output_frame.rowconfigure(0, weight=1)
 
-            decrypted_output = Text(output_frame, font=fixed_font, bg="white", relief=GROOVE, wrap=WORD, bd=0)
+            decrypted_output = Text(output_frame, font=fixed_font, bg="white", relief=FLAT, wrap=WORD, bd=0)
             decrypted_output.grid(row=0, column=0, sticky="nsew")
             decrypted_output.delete(1.0, END)
             decrypted_output.insert(END, decrypted_text)
@@ -310,6 +315,26 @@ def machine_screen():
     fixed_font = tkfont.Font(family=base_family, size=13)
     btn_fixed_font = tkfont.Font(family=base_family, size=9)
 
+
+    #Scrollbar styling
+    style = ttk.Style()
+    style.theme_use("clam")
+    style.configure(
+        "Custom.Vertical.TScrollbar",
+        background=scrollbar_color,      # thumb color
+        troughcolor=scrollbar_color2,     # track color
+        bordercolor=scrollbar_color2,
+        arrowcolor=scrollbar_color3,
+        lightcolor=scrollbar_color,
+        darkcolor=scrollbar_color
+    )
+
+    style.map(
+        "Custom.Vertical.TScrollbar",
+        background=[("disabled", scrollbar_color), ("active", scrollbar_color)],
+        arrowcolor=[("disabled", scrollbar_color3)]
+    )
+
     favicon = PhotoImage(file="favicon.png")
     machine_screen.iconphoto(False, favicon)
 
@@ -332,10 +357,22 @@ def machine_screen():
     text_frame.columnconfigure(0, weight=1)
     text_frame.rowconfigure(0, weight=1)
 
-    first_text = Text(text_frame, font=fixed_font, bg=textbox_bg, fg=main_text, relief=FLAT, wrap=WORD, bd=0, height=4)
+    first_text = Text(text_frame,
+        font=fixed_font,
+        bg=textbox_bg,
+        fg=main_text,
+        insertbackground=main_text,
+        relief=FLAT,
+        wrap=WORD,
+        bd=0,
+        height=4,
+        highlightthickness=1,
+        highlightbackground=textbox_bg,
+        highlightcolor=textbox_bg
+    )
     first_text.grid(row=0, column=0, sticky="nsew")
 
-    scrollbar = Scrollbar(text_frame, orient=VERTICAL, command=first_text.yview)
+    scrollbar = ttk.Scrollbar(text_frame, orient=VERTICAL, command=first_text.yview, style="Custom.Vertical.TScrollbar")
     scrollbar.grid(row=0, column=1, sticky="ns")
     first_text.configure(yscrollcommand=scrollbar.set)
 
@@ -345,12 +382,20 @@ def machine_screen():
     )
 
     # Row 3: passcode entry + button
-    passcode_frame = Frame(machine_screen)
+    passcode_frame = Frame(machine_screen, bg=main_bg)
     passcode_frame.grid(row=3, column=0, columnspan=2, sticky="w", padx=20, pady=5)
 
     passcode = StringVar()
-    Entry(passcode_frame, textvariable=passcode, width=25, bg=textbox_bg, fg=main_text, font=fixed_font, show="*").pack(side=LEFT)
-    Button(passcode_frame, text="Change Password", bg=btn_color6, fg=main_text, font=btn_fixed_font, command=change_password).pack(side=LEFT, padx=(5, 0))
+    Entry_widget = Entry(
+        passcode_frame, textvariable=passcode, width=25, font=fixed_font, show="*",
+        bg=textbox_bg, fg=main_text, insertbackground=main_text,
+        relief=FLAT, bd=0,
+        highlightthickness=1,
+        highlightbackground=textbox_bg,  # ring color when unfocused
+        highlightcolor=textbox_bg        # ring color when focused
+    )
+    Entry_widget.pack(side=LEFT)
+    Button(passcode_frame, text="Change Password", bg=btn_color6, relief=FLAT, fg=main_text, font=btn_fixed_font, activebackground=btn_color6, command=change_password).pack(side=LEFT, padx=(5, 0))
 
     # Row 4: encrypt/decrypt — fixed height (row weight 0), full width
     Button(text="Encrypt", bg=btn_color1, fg=main_text, bd=0, font=btn_fixed_font, command=encryption).grid(
