@@ -29,6 +29,18 @@ old_pw = ""
 encrypt_screen = ""
 decrypt_screen = ""
 
+# Color scheme
+main_bg = "#1D3121"
+main_text = "white"
+textbox_bg = "#000000"
+btn_color1 = "plum"
+btn_color2 = "lightblue"
+btn_color3 = "lightcoral"
+btn_color4 = "DarkOliveGreen1"
+btn_color5 = "lightgray"
+btn_color6 = "gray"
+
+
 # Function to copy encrypted text
 def copy_encrypt():
     # Global variables
@@ -291,12 +303,12 @@ def machine_screen():
     machine_screen = Tk()
     machine_screen.geometry("400x420")
     machine_screen.title("Cipher Machine")
-    machine_screen.minsize(320, 380)  # minimum window size
+    machine_screen.minsize(420, 380)  # minimum window size
+    machine_screen.configure(bg=main_bg)
 
-    fixed_font = tkfont.nametofont("TkFixedFont")
-    fixed_font.configure(size=13)
-    btn_fixed_font = tkfont.nametofont("TkFixedFont")
-    btn_fixed_font.configure(size=9)
+    base_family = tkfont.nametofont("TkFixedFont").actual("family")
+    fixed_font = tkfont.Font(family=base_family, size=13)
+    btn_fixed_font = tkfont.Font(family=base_family, size=9)
 
     favicon = PhotoImage(file="favicon.png")
     machine_screen.iconphoto(False, favicon)
@@ -310,7 +322,7 @@ def machine_screen():
         first_text.delete(1.0, END)
 
     # Row 0: label
-    Label(text="Enter Text:", fg="black", font=fixed_font).grid(
+    Label(text="Enter Text:", bg=main_bg, fg=main_text, font=fixed_font).grid(
         row=0, column=0, columnspan=2, sticky="w", padx=20, pady=(15, 0)
     )
 
@@ -320,7 +332,7 @@ def machine_screen():
     text_frame.columnconfigure(0, weight=1)
     text_frame.rowconfigure(0, weight=1)
 
-    first_text = Text(text_frame, highlightthickness=1, font=fixed_font, bg="white", relief=GROOVE, wrap=WORD, bd=0, height=4)
+    first_text = Text(text_frame, font=fixed_font, bg=textbox_bg, fg=main_text, relief=FLAT, wrap=WORD, bd=0, height=4)
     first_text.grid(row=0, column=0, sticky="nsew")
 
     scrollbar = Scrollbar(text_frame, orient=VERTICAL, command=first_text.yview)
@@ -328,7 +340,7 @@ def machine_screen():
     first_text.configure(yscrollcommand=scrollbar.set)
 
     # Row 2: passcode label
-    Label(text="Enter Passcode:", fg="black", font=fixed_font).grid(
+    Label(text="Enter Passcode:", bg=main_bg, fg=main_text, font=fixed_font).grid(
         row=2, column=0, columnspan=2, sticky="w", padx=20, pady=(10, 0)
     )
 
@@ -337,25 +349,25 @@ def machine_screen():
     passcode_frame.grid(row=3, column=0, columnspan=2, sticky="w", padx=20, pady=5)
 
     passcode = StringVar()
-    Entry(passcode_frame, textvariable=passcode, width=25, highlightthickness=1, font=fixed_font, show="*").pack(side=LEFT)
-    Button(passcode_frame, text="Change Password", bg="beige", fg="black", bd=0, font=btn_fixed_font, command=change_password).pack(side=LEFT, padx=(5, 0))
+    Entry(passcode_frame, textvariable=passcode, width=25, bg=textbox_bg, fg=main_text, font=fixed_font, show="*").pack(side=LEFT)
+    Button(passcode_frame, text="Change Password", bg=btn_color6, fg=main_text, font=btn_fixed_font, command=change_password).pack(side=LEFT, padx=(5, 0))
 
     # Row 4: encrypt/decrypt — fixed height (row weight 0), full width
-    Button(text="Encrypt", bg="plum", fg="black", bd=0, font=btn_fixed_font, command=encryption).grid(
+    Button(text="Encrypt", bg=btn_color1, fg=main_text, bd=0, font=btn_fixed_font, command=encryption).grid(
         row=4, column=0, sticky="ew", padx=(20, 5), pady=10, ipady=15
     )
-    Button(text="Decrypt", bg="lightblue", fg="black", bd=0, font=btn_fixed_font, command=decryption).grid(
+    Button(text="Decrypt", bg=btn_color2, fg=main_text, bd=0, font=btn_fixed_font, command=decryption).grid(
         row=4, column=1, sticky="ew", padx=(5, 20), pady=10, ipady=15
     )
 
     # Rows 5-7: reset, save, import — fixed height, pinned to bottom since no weight above them
-    Button(text="Reset", bg="lightcoral", fg="black", bd=0, font=btn_fixed_font, command=reset_machine).grid(
+    Button(text="Reset", bg=btn_color3, fg=main_text, bd=0, font=btn_fixed_font, command=reset_machine).grid(
         row=5, column=0, columnspan=2, sticky="ew", padx=20, pady=5, ipady=10
     )
-    Button(text="Save", bg="DarkOliveGreen1", fg="black", bd=0, font=btn_fixed_font, command=save_text).grid(
+    Button(text="Save", bg=btn_color4, fg=main_text, bd=0, font=btn_fixed_font, command=save_text).grid(
         row=6, column=0, columnspan=2, sticky="ew", padx=20, pady=5, ipady=10
     )
-    Button(text="Import File", bg="lightgray", fg="black", bd=0, font=btn_fixed_font, command=import_file).grid(
+    Button(text="Import File", bg=btn_color5, fg=main_text, bd=0, font=btn_fixed_font, command=import_file).grid(
         row=7, column=0, columnspan=2, sticky="ew", padx=20, pady=(5, 15)
     )
 
