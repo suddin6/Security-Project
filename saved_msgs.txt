@@ -8,3 +8,4 @@ Decrypted Text: hi
 
 Decrypted Text: Hello u loser
 
+Encrypted Text: dGVzdAo=
