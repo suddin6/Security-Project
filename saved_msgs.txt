@@ -1,11 +1,3 @@
 Here are your saved messages:
-Encrypted Text: SGVsbG8K
-Decrypted Text: Hello
-
-Encrypted Text: SGVsbG8K
-Encrypted Text: aGkK
-Decrypted Text: hi
-
-Decrypted Text: Hello u loser
-
-Encrypted Text: dGVzdAo=
+Original: test
+Encrypted: dGVzdA==

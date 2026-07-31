@@ -62,10 +62,25 @@ de_btn_color1 = "#4D4F5A"
 de_main_text = "#C5C5D4"
 
 mode = "encrypt"  # global toggle state
+save_file_path = "saved_msgs.txt"
+has_valid_result = False
+
+def choose_save_location():
+    global save_file_path
+    path = filedialog.asksaveasfilename(
+        title="Choose Save Location",
+        defaultextension=".txt",
+        filetypes=[("Text files", "*.txt")],
+        initialfile="saved_msgs.txt"
+    )
+    if path:
+        save_file_path = path
+        messagebox.showinfo("SUCCESS", f"Save location set to:\n{save_file_path}")
 
 def perform_action():
-    global encrypted_text, decrypted_text, mode, first_text, second_text
+    global encrypted_text, decrypted_text, mode, first_text, second_text, has_valid_result
 
+    has_valid_result = False
     secret_key = passcode.get()
 
     if secret_key == "":
@@ -88,6 +103,7 @@ def perform_action():
         second_text.delete(1.0, END)
         second_text.insert(END, encrypted_text)
         second_text.configure(state=DISABLED)
+        has_valid_result = True
     else:  # decrypt
         if len(msg.strip()) % 4 != 0:
             show_error("Invalid input. Please enter a valid encrypted text.")
@@ -102,6 +118,7 @@ def perform_action():
         second_text.delete(1.0, END)
         second_text.insert(END, decrypted_text)
         second_text.configure(state=DISABLED)
+        has_valid_result = True
 
 
 def switch_action():
@@ -122,31 +139,108 @@ def switch_action():
     if output_content:
         perform_action()
 
+def clear_saved():
+    global save_file_path
+    if not os.path.exists(save_file_path):
+        messagebox.showinfo("INFO", "There are no saved messages to clear.")
+        return
+
+    confirmed = messagebox.askyesno(
+        "Confirm Clear",
+        "Are you sure you want to clear your saved messages? This cannot be undone."
+    )
+    if confirmed:
+        try:
+            os.remove(save_file_path)
+            messagebox.showinfo("SUCCESS", "Saved messages have been cleared.")
+        except Exception as error:
+            messagebox.showerror("ERROR", f"An error occurred: {str(error)}")
+
 # Function to save messages to a text file
 def save_text():
-    try:
-        # If file does not exist, create one
-        if not os.path.exists("saved_msgs.txt"):
-            with open("saved_msgs.txt", "w") as file:
-                file.write("Here are your saved messages:\n")
-            messagebox.showinfo("SUCCESS", "File has been created! Please click the save button once more!")
-        else:
-            # If encrypt button was clicked, write the encrypted message to file
-            if mode == "encrypt":
-                with open("saved_msgs.txt", "a") as file:
-                    file.write("Encrypted Text: " + encrypted_text + "\n")
-            
-            # If decrypt button was clicked, write the decrypted message to file
-            elif mode == "decrypt":
-                with open("saved_msgs.txt", "a") as file:
-                    file.write("Decrypted Text: " + decrypted_text + "\n")
-    
-            # Show success message to user
-            messagebox.showinfo("SUCCESS", "Text saved to file successfully!")
+    global mode, save_file_path, has_valid_result
 
-    # Display error if any
-    except Exception as error:
-        messagebox.showerror("ERROR", f"An error occurred: {str(error)}")
+    if not has_valid_result:
+        messagebox.showerror("ERROR", "There's nothing valid to save yet.")
+        return
+
+    original = first_text.get(1.0, END).strip()
+    result = second_text.get(1.0, END).strip()
+
+    if len(result) == 0:
+        messagebox.showerror("ERROR", "There's nothing to save yet.")
+        return
+
+    confirm_screen = Toplevel(machine_screen)
+    confirm_screen.title("Confirm Save")
+    confirm_screen.geometry("320x320")
+    confirm_screen.minsize(280, 280)
+    confirm_screen.configure(bg=main_bg)
+
+    favicon = PhotoImage(file="favicon.png")
+    confirm_screen.iconphoto(False, favicon)
+
+    confirm_screen.columnconfigure(0, weight=1)
+    confirm_screen.rowconfigure(1, weight=1)
+
+    Label(confirm_screen, text="Preview:", bg=main_bg, fg=main_text).grid(
+        row=0, column=0, sticky="w", padx=15, pady=(15, 0)
+    )
+
+    preview_frame = Frame(confirm_screen)
+    preview_frame.grid(row=1, column=0, sticky="nsew", padx=15, pady=5)
+    preview_frame.columnconfigure(0, weight=1)
+    preview_frame.rowconfigure(0, weight=1)
+
+    preview_box = Text(preview_frame, bd=0, wrap=WORD)
+    preview_box.grid(row=0, column=0, sticky="nsew")
+    preview_scrollbar = ttk.Scrollbar(preview_frame, orient=VERTICAL, command=preview_box.yview, style="Custom.Vertical.TScrollbar")
+    preview_scrollbar.grid(row=0, column=1, sticky="ns")
+    preview_box.configure(yscrollcommand=preview_scrollbar.set)
+
+    include_original = BooleanVar(value=False)
+
+    def update_preview():
+        preview_box.delete(1.0, END)
+        if include_original.get():
+            preview_box.insert(END, f"Original: {original}\n{mode.capitalize()}ed: {result}\n")
+        else:
+            preview_box.insert(END, f"{mode.capitalize()}ed: {result}\n")
+
+    update_preview()  # show default preview immediately
+
+    Checkbutton(
+        confirm_screen, text="Include original text", variable=include_original,
+        bg=main_bg, fg=main_text, selectcolor=textbox_bg, activebackground=main_bg,
+        activeforeground=main_text, command=update_preview
+    ).grid(row=2, column=0, sticky="w", padx=15, pady=(5, 0))
+
+    def confirm_save():
+        try:
+            file_exists = os.path.exists(save_file_path)
+            with open(save_file_path, "a") as file:
+                if not file_exists:
+                    file.write("Here are your saved messages:\n")
+                if include_original.get():
+                    file.write(f"Original: {original}\n{mode.capitalize()}ed: {result}\n")
+                else:
+                    file.write(f"{mode.capitalize()}ed: {result}\n")
+            confirm_screen.destroy()
+            messagebox.showinfo("SUCCESS", "Text saved to file successfully!")
+        except Exception as error:
+            messagebox.showerror("ERROR", f"An error occurred: {str(error)}")
+
+    btn_frame = Frame(confirm_screen, bg=main_bg)
+    btn_frame.grid(row=3, column=0, sticky="ew", padx=15, pady=15)
+    btn_frame.columnconfigure(0, weight=1)
+    btn_frame.columnconfigure(1, weight=1)
+
+    Button(btn_frame, text="Save", bg=btn_color4, fg=main_text, bd=0, font=btn_fixed_font, command=confirm_save).grid(
+        row=0, column=0, sticky="ew", padx=(0, 5), ipady=8
+    )
+    Button(btn_frame, text="Cancel", bg=btn_color3, fg=main_text, bd=0, font=btn_fixed_font, command=confirm_screen.destroy).grid(
+        row=0, column=1, sticky="ew", padx=(5, 0), ipady=8
+    )
 
 # Function to track the password
 def save_password():
@@ -238,12 +332,26 @@ def machine_screen():
     machine_screen = Tk()
     machine_screen.geometry("400x420")
     machine_screen.title("Cipher Machine")
-    machine_screen.minsize(420, 380)  # minimum window size
+    machine_screen.minsize(460, 380)  # minimum window size
     machine_screen.configure(bg=main_bg)
+
+    menu_bar = Menu(machine_screen)
+    machine_screen.config(menu=menu_bar)
+
+    file_menu = Menu(menu_bar, tearoff=0)
+    file_menu.add_command(label="Save...", command=save_text)
+    file_menu.add_command(label="Clear Saved Messages...", command=clear_saved)
+    file_menu.add_separator()
+    file_menu.add_command(label="Choose Save Location...", command=choose_save_location)
+    file_menu.add_separator()
+    file_menu.add_command(label="Import Text...", command=import_file)
+    file_menu.add_separator()
+    file_menu.add_command(label="Exit", command=machine_screen.destroy)
+    menu_bar.add_cascade(label="File", menu=file_menu)
 
     base_family = tkfont.nametofont("TkFixedFont").actual("family")
     fixed_font = tkfont.Font(family=base_family, size=13)
-    btn_fixed_font = tkfont.Font(family=base_family, size=9)
+    btn_fixed_font = tkfont.Font(family=base_family, size=11)
 
     #Tkinter style rules for the whole application
     machine_screen.option_add("*Text.background", textbox_bg)
@@ -315,6 +423,13 @@ def machine_screen():
     in_scrollbar.grid(row=0, column=1, sticky="ns")
     first_text.configure(yscrollcommand=in_scrollbar.set)
 
+    def on_input_change(event):
+        global has_valid_result
+        has_valid_result = False
+        first_text.edit_modified(False)  # reset the flag so this event can fire again
+
+    first_text.bind("<<Modified>>", on_input_change)
+
     # Row 2: action + switch buttons
     action_btn = Button(text=mode.capitalize(), bg=btn_color1, fg=main_text, bd=0, font=btn_fixed_font, command=perform_action)
     action_btn.grid(row=2, column=0, sticky="ew", padx=(20, 5), pady=5, ipady=10)
@@ -350,15 +465,20 @@ def machine_screen():
     Button(passcode_frame, text="Change Password", bg=btn_color6, relief=FLAT, fg=main_text, font=btn_fixed_font, activebackground=btn_color6, command=change_password).pack(side=LEFT, padx=(5, 0))
 
 
-    Button(text="Reset", bg=btn_color3, fg=main_text, bd=0, font=btn_fixed_font, command=reset_machine).grid(
+    Button(text="Clear All", bg=btn_color3, fg=main_text, bd=0, font=btn_fixed_font, command=reset_machine).grid(
         row=6, column=0, columnspan=2, sticky="ew", padx=20, pady=5, ipady=10
     )
-    Button(text="Save", bg=btn_color4, fg=main_text, bd=0, font=btn_fixed_font, command=save_text).grid(
-        row=7, column=0, columnspan=2, sticky="ew", padx=20, pady=5, ipady=10
-    )
-    Button(text="Import File", bg=btn_color5, fg=main_text, bd=0, font=btn_fixed_font, command=import_file).grid(
-        row=8, column=0, columnspan=2, sticky="ew", padx=20, pady=(5, 15)
-    )
+
+    # Button(text="Save", bg=btn_color4, fg=main_text, bd=0, font=btn_fixed_font, command=save_text).grid(
+    #     row=7, column=0, sticky="ew", padx=(20, 5), pady=5, ipady=10
+    # )
+    # Button(text="Clear Save", bg=btn_color2, fg=main_text, bd=0, font=btn_fixed_font, command=clear_saved).grid(
+    #     row=7, column=1, sticky="ew", padx=(5, 20), pady=5, ipady=10
+    # )
+
+    # Button(text="Import Text", bg=btn_color5, fg=main_text, bd=0, font=btn_fixed_font, command=import_file).grid(
+    #     row=8, column=0, columnspan=2, sticky="ew", padx=20, pady=(5, 15)
+    # )
 
     machine_screen.mainloop()
 
