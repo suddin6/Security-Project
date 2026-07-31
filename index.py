@@ -72,7 +72,7 @@ def perform_action():
         show_error("Please input a password to continue.")
         return
     if secret_key != create_pw:
-        show_error("Incorrect Password. Please try again.")
+        show_error("Incorrect password.")
         return
 
     msg = first_text.get(1.0, END)
