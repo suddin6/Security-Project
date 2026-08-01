@@ -1,0 +1,23 @@
+# Color scheme (main)
+main_bg = "#16241C"
+main_text = "#AAD1B6"
+textbox_bg = "#000000"
+btn_color1 = "#425A4F"
+btn_color2 = "#5E5577"
+btn_color3 = "#815B5B"
+btn_color4 = "#5B6F81"
+btn_color5 = "#7D815B"
+btn_color6 = "#2C332E"
+scrollbar_color = "#2C332E"
+scrollbar_color2 = "black"
+scrollbar_color3 = "#8DB699"
+
+en_main_bg = "#241617"
+en_textbox_bg = "#000000"
+en_btn_color1 = "#5A4D4D"
+en_main_text = "#D4C5C5"
+
+de_main_bg = "#161624"
+de_textbox_bg = "#000000"
+de_btn_color1 = "#4D4F5A"
+de_main_text = "#C5C5D4"
