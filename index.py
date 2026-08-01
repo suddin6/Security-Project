@@ -23,16 +23,10 @@ import threading
 # While it encrypts, main can animate the "Loading..."
 
 from config import *
-from crypto_logic import encrypt_text, decrypt_text
+from crypto_logic import ALGORITHMS, DEFAULT_ALGORITHM
 
-try:
-    from cryptography.fernet import Fernet, InvalidToken
-    from cryptography.hazmat.primitives import hashes
-    from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-except ImportError:
-    raise ImportError(
-        "The 'cryptography' package is required. Install it with: pip install cryptography"
-    )
+algorithm_var = None  # will become a StringVar once machine_screen() creates the window
+
 
 # Encrypted and decrypted text outputs 
 encrypted_text = ""
@@ -132,12 +126,14 @@ def perform_action(selected_mode):
     def do_work():
         global encrypted_text, decrypted_text
 
+        encrypt_func, decrypt_func = ALGORITHMS[algorithm_var.get()]
+
         try:
             if mode == "encrypt":
-                result = encrypt_text(msg)
+                result = encrypt_func(msg, secret_key)
                 encrypted_text = result
             else:
-                result = decrypt_text(msg)
+                result = decrypt_func(msg, secret_key)
                 decrypted_text = result
 
             def show_result():
@@ -418,11 +414,12 @@ def show_error(message):
 
 # Main GUI Screen for Cipher Machine Tool
 def machine_screen():
-    global machine_screen, passcode, first_text, second_text, fixed_font, btn_fixed_font, encrypt_btn, decrypt_btn
+    global machine_screen, passcode, first_text, second_text, fixed_font, btn_fixed_font, encrypt_btn, decrypt_btn, algorithm_var
 
     save_password()
 
     machine_screen = Tk()
+    algorithm_var = StringVar(value=DEFAULT_ALGORITHM)
     machine_screen.geometry("400x420")
     machine_screen.title("Cipher Machine")
     machine_screen.minsize(460, 380)  # minimum window size
@@ -441,6 +438,11 @@ def machine_screen():
     file_menu.add_separator()
     file_menu.add_command(label="Exit", command=machine_screen.destroy)
     menu_bar.add_cascade(label="File", menu=file_menu)
+    algo_menu = Menu(menu_bar, tearoff=0)
+    for algo_name in ALGORITHMS:
+        algo_menu.add_radiobutton(label=algo_name, variable=algorithm_var, value=algo_name)
+    menu_bar.add_cascade(label="Algorithm", menu=algo_menu)
+
 
     base_family = tkfont.nametofont("TkFixedFont").actual("family")
     fixed_font = tkfont.Font(family=base_family, size=13)
