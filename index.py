@@ -562,7 +562,7 @@ def machine_screen():
     algorithm_var = StringVar(value=DEFAULT_ALGORITHM)
     machine_screen.geometry("400x420")
     machine_screen.title("Cipher Machine")
-    machine_screen.minsize(460, 380)  # minimum window size
+    machine_screen.minsize(500, 380)  # minimum window size
     machine_screen.configure(bg=main_bg)
 
     menu_bar = Menu(machine_screen)
@@ -709,8 +709,22 @@ def machine_screen():
     passcode_frame.grid(row=5, column=0, columnspan=2, sticky="w", padx=20, pady=5)
 
     passcode = StringVar()
-    Entry_widget = Entry(passcode_frame, textvariable=passcode, width=25, font=fixed_font, show="*", bd=0)
+    Entry_widget = Entry(passcode_frame, textvariable=passcode, width=21, font=fixed_font, show="*", bd=0)
     Entry_widget.pack(side=LEFT)
+    
+
+    show_passcode = BooleanVar(value=False)
+
+    def toggle_passcode_visibility():
+        Entry_widget.configure(show="" if show_passcode.get() else "*")
+
+    Checkbutton(
+        passcode_frame, text="Show", variable=show_passcode,
+        bg=main_bg, fg=main_text, selectcolor=textbox_bg,
+        activebackground=main_bg, activeforeground=main_text,
+        command=toggle_passcode_visibility
+    ).pack(side=LEFT, padx=(5, 0))
+
     Button(passcode_frame, text="Change Password", bg=btn_color6, relief=FLAT, fg=main_text, font=btn_fixed_font, activebackground=btn_color6, command=change_password).pack(side=LEFT, padx=(5, 0))
 
     # Row 6: shift label
