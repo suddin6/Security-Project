@@ -1,3 +1,5 @@
 .vscode/
 __pycache__/
 *.pyc
+passwords.txt
+saved_msgs.txt

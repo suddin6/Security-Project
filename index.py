@@ -23,7 +23,9 @@ import threading
 # While it encrypts, main can animate the "Loading..."
 
 from config import *
-from crypto_logic import ALGORITHMS, DEFAULT_ALGORITHM
+from crypto_logic import ALGORITHMS, DEFAULT_ALGORITHM, INPUT_TYPE, rsa_generate_keypair
+
+from cryptography.hazmat.primitives import serialization
 
 algorithm_var = None  # will become a StringVar once machine_screen() creates the window
 
@@ -37,6 +39,17 @@ second_text = None
 
 encrypt_btn = None
 decrypt_btn = None
+
+passcode_label = None
+passcode_frame = None
+
+shift_label = None
+shift_frame = None
+shift_var = None
+
+rsa_public_key = ""
+rsa_private_key = ""
+rsa_key_screen = None
 
 # Variables to store passwords
 create_pw = ""
@@ -91,33 +104,43 @@ def perform_action(selected_mode):
 
     mode = selected_mode
     has_valid_result = False
-    secret_key = passcode.get()
 
-    if secret_key == "":
-        show_error("Please input a password to continue.")
-        return
-    if secret_key != create_pw:
-        show_error("Incorrect password.")
-        return
+    algo_name = algorithm_var.get()
+    input_type = INPUT_TYPE.get(algo_name, "passcode")
+    key_input = ""
+
+    if input_type == "passcode":
+        key_input = passcode.get()
+        if key_input == "":
+            show_error("Please input a password to continue.")
+            return
+        if key_input != create_pw:
+            show_error("Incorrect password.")
+            return
+    elif input_type == "number": # Caesar shift
+        key_input = shift_var.get().strip()
+        if key_input == "":
+            show_error("Please enter a number to shift by.")
+            return
+    elif input_type == "keypair": # RSA
+        key_input = rsa_public_key if mode == "encrypt" else rsa_private_key
+        if key_input == "":
+            show_error("Please set your RSA keys (Algorithm > Manage RSA Keys).")
+            return
 
     msg = first_text.get(1.0, END)
 
     if len(msg.strip()) == 0:
         show_error(f"Please enter a text to {mode}.")
         return
-    
 
-    MAX_CHARS = 50000  # limit
-
-    msg = first_text.get(1.0, END)
+    MAX_CHARS = 50000
 
     if len(msg.strip()) > MAX_CHARS:
         show_error(f"Text is too long ({len(msg.strip())} characters). Please limit input to {MAX_CHARS} characters.")
         encrypt_btn.configure(state=NORMAL)
         decrypt_btn.configure(state=NORMAL)
         return
-
-    
 
     encrypt_btn.configure(state=DISABLED)
     decrypt_btn.configure(state=DISABLED)
@@ -126,14 +149,14 @@ def perform_action(selected_mode):
     def do_work():
         global encrypted_text, decrypted_text
 
-        encrypt_func, decrypt_func = ALGORITHMS[algorithm_var.get()]
+        encrypt_func, decrypt_func = ALGORITHMS[algo_name]
 
         try:
             if mode == "encrypt":
-                result = encrypt_func(msg, secret_key)
+                result = encrypt_func(msg, key_input)
                 encrypted_text = result
             else:
-                result = decrypt_func(msg, secret_key)
+                result = decrypt_func(msg, key_input)
                 decrypted_text = result
 
             def show_result():
@@ -151,19 +174,18 @@ def perform_action(selected_mode):
 
             machine_screen.after(0, show_result)
 
-        except Exception:
+        except Exception as error:
+            error_message = str(error) if str(error) else "Invalid input. Please try again."
+
             def show_fail():
                 stop_loading()
-                show_error("Invalid input. Please enter a valid encrypted text.")
+                show_error(error_message)
                 encrypt_btn.configure(state=NORMAL)
                 decrypt_btn.configure(state=NORMAL)
+
             machine_screen.after(0, show_fail)
 
     threading.Thread(target=do_work, daemon=True).start()
-    # target=do_work means this second thread's job is to run do_work()
-    # A "daemon thread" is a background process that can be killed immediately when the program closes
-    # otherwise if someone closes the app while it's running there will be a delay
-
 
 
 def clear_saved():
@@ -296,6 +318,115 @@ def save_password():
 
 
 
+
+
+
+
+# Popup to manage RSA keys
+
+def manage_rsa_keys():
+    global rsa_public_key, rsa_private_key, rsa_key_screen
+
+    if rsa_key_screen is not None and rsa_key_screen.winfo_exists():
+        rsa_key_screen.lift()
+        rsa_key_screen.focus_force()
+        return
+
+    rsa_key_screen = Toplevel(machine_screen)
+    rsa_key_screen.title("Manage RSA Keys")
+    rsa_key_screen.geometry("420x460")
+    rsa_key_screen.minsize(380, 400)
+    rsa_key_screen.configure(bg=main_bg)
+
+    favicon = PhotoImage(file="favicon.png")
+    rsa_key_screen.iconphoto(False, favicon)
+
+    rsa_key_screen.columnconfigure(0, weight=1)
+    rsa_key_screen.rowconfigure(1, weight=1)
+    rsa_key_screen.rowconfigure(3, weight=1)
+
+    Label(rsa_key_screen, text="Public Key (used to encrypt):", bg=main_bg, fg=main_text).grid(
+        row=0, column=0, sticky="w", padx=15, pady=(15, 0)
+    )
+    public_frame = Frame(rsa_key_screen)
+    public_frame.grid(row=1, column=0, sticky="nsew", padx=15, pady=5)
+    public_frame.columnconfigure(0, weight=1)
+    public_frame.rowconfigure(0, weight=1)
+    public_box = Text(public_frame, bd=0, wrap=WORD, height=6)
+    public_box.grid(row=0, column=0, sticky="nsew")
+    public_box.insert(END, rsa_public_key)
+    pub_scrollbar = ttk.Scrollbar(public_frame, orient=VERTICAL, command=public_box.yview, style="Custom.Vertical.TScrollbar")
+    pub_scrollbar.grid(row=0, column=1, sticky="ns")
+    public_box.configure(yscrollcommand=pub_scrollbar.set)
+
+    Label(rsa_key_screen, text="Private Key (used to decrypt):", bg=main_bg, fg=main_text).grid(
+        row=2, column=0, sticky="w", padx=15, pady=(10, 0)
+    )
+    private_frame = Frame(rsa_key_screen)
+    private_frame.grid(row=3, column=0, sticky="nsew", padx=15, pady=5)
+    private_frame.columnconfigure(0, weight=1)
+    private_frame.rowconfigure(0, weight=1)
+    private_box = Text(private_frame, bd=0, wrap=WORD, height=6)
+    private_box.grid(row=0, column=0, sticky="nsew")
+    private_box.insert(END, rsa_private_key)
+    priv_scrollbar = ttk.Scrollbar(private_frame, orient=VERTICAL, command=private_box.yview, style="Custom.Vertical.TScrollbar")
+    priv_scrollbar.grid(row=0, column=1, sticky="ns")
+    private_box.configure(yscrollcommand=priv_scrollbar.set)
+
+    def generate_new_keypair():
+        public_pem, private_pem = rsa_generate_keypair()
+        public_box.delete(1.0, END)
+        public_box.insert(END, public_pem)
+        private_box.delete(1.0, END)
+        private_box.insert(END, private_pem)
+
+    Button(rsa_key_screen, text="Generate New Keypair", bg=btn_color6, fg=main_text, bd=0, font=btn_fixed_font, command=generate_new_keypair).grid(
+        row=4, column=0, sticky="ew", padx=15, pady=(5, 10), ipady=6
+    )
+
+    def save_keys():
+        global rsa_public_key, rsa_private_key, rsa_key_screen
+
+        new_public = public_box.get(1.0, END).strip()
+        new_private = private_box.get(1.0, END).strip()
+
+        if new_public:
+            try:
+                serialization.load_pem_public_key(new_public.encode("utf-8"))
+            except Exception:
+                messagebox.showerror("ERROR", "Invalid public key format.", parent=rsa_key_screen)
+                return
+
+        if new_private:
+            try:
+                serialization.load_pem_private_key(new_private.encode("utf-8"), password=None)
+            except Exception:
+                messagebox.showerror("ERROR", "Invalid private key format.", parent=rsa_key_screen)
+                return
+
+        rsa_public_key = new_public
+        rsa_private_key = new_private
+        rsa_key_screen.destroy()
+        rsa_key_screen = None
+        messagebox.showinfo("SUCCESS", "RSA keys have been set.", parent=machine_screen)
+
+    def cancel_keys():
+        global rsa_key_screen
+        rsa_key_screen.destroy()
+        rsa_key_screen = None
+
+    btn_frame = Frame(rsa_key_screen, bg=main_bg)
+    btn_frame.grid(row=5, column=0, sticky="ew", padx=15, pady=(0, 15))
+    btn_frame.columnconfigure(0, weight=1)
+    btn_frame.columnconfigure(1, weight=1)
+    Button(btn_frame, text="Save", bg=btn_color4, fg=main_text, bd=0, font=btn_fixed_font, command=save_keys).grid(
+        row=0, column=0, sticky="ew", padx=(0, 5), ipady=8
+    )
+    Button(btn_frame, text="Cancel", bg=btn_color3, fg=main_text, bd=0, font=btn_fixed_font, command=cancel_keys).grid(
+        row=0, column=1, sticky="ew", padx=(5, 0), ipady=8
+    )
+
+
 # Function to change passwords
 def change_password():
     global create_pw, pw_screen
@@ -310,14 +441,15 @@ def change_password():
 
     pw_screen = Toplevel(machine_screen)
     pw_screen.title("Change Password")
-    pw_screen.geometry("320x260")
-    pw_screen.minsize(300, 240)
+    pw_screen.geometry("320x320")
+    pw_screen.minsize(300, 300)
     pw_screen.configure(bg=main_bg)
 
     favicon = PhotoImage(file="favicon.png")
     pw_screen.iconphoto(False, favicon)
 
     pw_screen.columnconfigure(0, weight=1)
+    pw_screen.rowconfigure(4, weight=1)  # the checkbox row grows to fill extra space   
 
     Label(pw_screen, text="Old Password:", bg=main_bg, fg=main_text).grid(
         row=0, column=0, sticky="w", padx=15, pady=(15, 0)
@@ -412,9 +544,17 @@ def show_error(message):
     second_text.configure(state=DISABLED)
 
 
+
+
+
+
+
+
+
+
 # Main GUI Screen for Cipher Machine Tool
 def machine_screen():
-    global machine_screen, passcode, first_text, second_text, fixed_font, btn_fixed_font, encrypt_btn, decrypt_btn, algorithm_var
+    global machine_screen, passcode, first_text, second_text, fixed_font, btn_fixed_font, encrypt_btn, decrypt_btn, algorithm_var, passcode_label, passcode_frame, shift_label, shift_frame, shift_var
 
     save_password()
 
@@ -439,8 +579,12 @@ def machine_screen():
     file_menu.add_command(label="Exit", command=machine_screen.destroy)
     menu_bar.add_cascade(label="File", menu=file_menu)
     algo_menu = Menu(menu_bar, tearoff=0)
+    algo_menu.add_command(label="Change Password...", command=change_password)
+    algo_menu.add_separator()
     for algo_name in ALGORITHMS:
         algo_menu.add_radiobutton(label=algo_name, variable=algorithm_var, value=algo_name)
+    algo_menu.add_separator()
+    algo_menu.add_command(label="Manage RSA Keys...", command=manage_rsa_keys)
     menu_bar.add_cascade(label="Algorithm", menu=algo_menu)
 
 
@@ -557,9 +701,8 @@ def machine_screen():
     second_text.configure(yscrollcommand=out_scrollbar.set)
 
     # Row 4: passcode label
-    Label(text="Enter Passcode:").grid(
-        row=4, column=0, columnspan=2, sticky="w", padx=20, pady=(10, 0)
-    )
+    passcode_label = Label(text="Enter Passcode:")
+    passcode_label.grid(row=4, column=0, columnspan=2, sticky="w", padx=20, pady=(10, 0))
 
     # Row 5: passcode entry + button
     passcode_frame = Frame(machine_screen, bg=main_bg)
@@ -570,21 +713,51 @@ def machine_screen():
     Entry_widget.pack(side=LEFT)
     Button(passcode_frame, text="Change Password", bg=btn_color6, relief=FLAT, fg=main_text, font=btn_fixed_font, activebackground=btn_color6, command=change_password).pack(side=LEFT, padx=(5, 0))
 
+    # Row 6: shift label
+    shift_label = Label(text="Shift Amount:")
+    shift_label.grid(row=6, column=0, columnspan=2, sticky="w", padx=20, pady=(10, 0))
 
+    # Row 7: shift entry
+    shift_frame = Frame(machine_screen, bg=main_bg)
+    shift_frame.grid(row=7, column=0, columnspan=2, sticky="w", padx=20, pady=5)
+
+    def validate_number_input(new_value):
+        if new_value == "":
+            return True  # allow clearing the field entirely
+        return new_value.lstrip("-").isdigit()  # allow digits, and an optional leading minus sign
+
+    validate_cmd = (machine_screen.register(validate_number_input), "%P")
+
+    shift_var = StringVar()
+    Entry(shift_frame, textvariable=shift_var, width=10, font=fixed_font, bd=0,
+        validate="key", validatecommand=validate_cmd).pack(side=LEFT) 
+
+    def update_key_input_visibility(*args):
+        input_type = INPUT_TYPE.get(algorithm_var.get(), "passcode")
+
+        if input_type == "passcode":
+            passcode_label.grid()
+            passcode_frame.grid()
+        else:
+            passcode_label.grid_remove()
+            passcode_frame.grid_remove()
+
+        if input_type == "number":
+            shift_label.grid()
+            shift_frame.grid()
+        else:
+            shift_label.grid_remove()
+            shift_frame.grid_remove()
+
+    
+
+    algorithm_var.trace_add("write", update_key_input_visibility)
+    update_key_input_visibility()
+
+    #Row 8: Clear All Button
     Button(text="Clear All", bg=btn_color3, fg=main_text, bd=0, font=btn_fixed_font, command=reset_machine).grid(
-        row=6, column=0, columnspan=2, sticky="ew", padx=20, pady=5, ipady=10
+        row=8, column=0, columnspan=2, sticky="ew", padx=20, pady=5, ipady=10
     )
-
-    # Button(text="Save", bg=btn_color4, fg=main_text, bd=0, font=btn_fixed_font, command=save_text).grid(
-    #     row=7, column=0, sticky="ew", padx=(20, 5), pady=5, ipady=10
-    # )
-    # Button(text="Clear Save", bg=btn_color2, fg=main_text, bd=0, font=btn_fixed_font, command=clear_saved).grid(
-    #     row=7, column=1, sticky="ew", padx=(5, 20), pady=5, ipady=10
-    # )
-
-    # Button(text="Import Text", bg=btn_color5, fg=main_text, bd=0, font=btn_fixed_font, command=import_file).grid(
-    #     row=8, column=0, columnspan=2, sticky="ew", padx=20, pady=(5, 15)
-    # )
 
     machine_screen.mainloop()
 
