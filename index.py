@@ -532,11 +532,40 @@ def import_file():
         # Display success message
         messagebox.showinfo("SUCCESS", "You have successfully imported a file!")
 
+# Copy to Clipboard Functionality
+def copy_input_text():
+    text = first_text.get(1.0, END).strip()
+    if not text:
+        messagebox.showerror("ERROR", "There's nothing to copy yet.")
+        return
+    machine_screen.clipboard_clear()
+    machine_screen.clipboard_append(text)
+    machine_screen.update()
+    messagebox.showinfo("SUCCESS", "Text copied to clipboard!")
+
+def copy_output_text():
+    text = second_text.get(1.0, END).strip()
+    if not text or not has_valid_result:
+        messagebox.showerror("ERROR", "There's nothing valid to copy yet.")
+        return
+    machine_screen.clipboard_clear()
+    machine_screen.clipboard_append(text)
+    machine_screen.update()
+    messagebox.showinfo("SUCCESS", "Text copied to clipboard!")
+
+
+
 def show_error(message):
     second_text.configure(state=NORMAL)
     second_text.delete(1.0, END)
     second_text.insert(END, message, "error")
     second_text.configure(state=DISABLED)
+
+
+
+
+
+
 
 # Main GUI Screen for Cipher Machine Tool
 def machine_screen():
@@ -548,7 +577,7 @@ def machine_screen():
     algorithm_var = StringVar(value=DEFAULT_ALGORITHM)
     machine_screen.geometry("400x420")
     machine_screen.title("Cipher Machine")
-    machine_screen.minsize(500, 380)  # minimum window size
+    machine_screen.minsize(500, 500)  # minimum window size
     machine_screen.configure(bg=main_bg)
 
     menu_bar = Menu(machine_screen)
@@ -625,7 +654,7 @@ def machine_screen():
     machine_screen.columnconfigure(0, weight=1)
     machine_screen.columnconfigure(1, weight=1)
     machine_screen.rowconfigure(1, weight=1)
-    machine_screen.rowconfigure(3, weight=1)
+    machine_screen.rowconfigure(4, weight=1)
 
     def reset_machine():
         passcode.set("")
@@ -655,15 +684,20 @@ def machine_screen():
 
     first_text.bind("<<Modified>>", on_input_change)
 
-    # Row 2: encrypt/decrypt buttons
-    encrypt_btn = Button(text="Encrypt", bg=btn_color1, fg=main_text, bd=0, font=btn_fixed_font, command=lambda: perform_action("encrypt"))
-    encrypt_btn.grid(row=2, column=0, sticky="ew", padx=(20, 5), pady=5, ipady=10)
-    decrypt_btn = Button(text="Decrypt", bg=btn_color2, fg=main_text, bd=0, font=btn_fixed_font, command=lambda: perform_action("decrypt"))
-    decrypt_btn.grid(row=2, column=1, sticky="ew", padx=(5, 20), pady=5, ipady=10)
+    #Row 2: Copy input text
+    Button(text="Copy", bg=btn_color6, fg=main_text, bd=0, font=btn_fixed_font, command=copy_input_text).grid(
+        row=2, column=0, columnspan=2, sticky="e", padx=20, pady=(0, 5), ipady=0
+    )
 
-    # Row 3: output box
+    # Row 3: encrypt/decrypt buttons
+    encrypt_btn = Button(text="Encrypt", bg=btn_color1, fg=main_text, bd=0, font=btn_fixed_font, command=lambda: perform_action("encrypt"))
+    encrypt_btn.grid(row=3, column=0, sticky="ew", padx=(20, 5), pady=5, ipady=10)
+    decrypt_btn = Button(text="Decrypt", bg=btn_color2, fg=main_text, bd=0, font=btn_fixed_font, command=lambda: perform_action("decrypt"))
+    decrypt_btn.grid(row=3, column=1, sticky="ew", padx=(5, 20), pady=5, ipady=10)
+
+    # Row 4: output box
     output_frame = Frame(machine_screen)
-    output_frame.grid(row=3, column=0, columnspan=2, sticky="nsew", padx=20, pady=5)
+    output_frame.grid(row=4, column=0, columnspan=2, sticky="nsew", padx=20, pady=5)
     output_frame.columnconfigure(0, weight=1)
     output_frame.rowconfigure(0, weight=1)
 
@@ -674,13 +708,18 @@ def machine_screen():
     out_scrollbar.grid(row=0, column=1, sticky="ns")
     second_text.configure(yscrollcommand=out_scrollbar.set)
 
-    # Row 4: passcode label
-    passcode_label = Label(text="Enter Passcode:")
-    passcode_label.grid(row=4, column=0, columnspan=2, sticky="w", padx=20, pady=(10, 0))
+    # Row 5: Copy output text
+    Button(text="Copy", bg=btn_color6, fg=main_text, bd=0, font=btn_fixed_font, command=copy_output_text).grid(
+        row=5, column=0, columnspan=2, sticky="e", padx=20, pady=(0, 5), ipady=0
+    )
 
-    # Row 5: passcode entry + button
+    # Row 6: passcode label
+    passcode_label = Label(text="Enter Passcode:")
+    passcode_label.grid(row=6, column=0, columnspan=2, sticky="w", padx=20, pady=(10, 0))
+
+    # Row 7: passcode entry + button
     passcode_frame = Frame(machine_screen, bg=main_bg)
-    passcode_frame.grid(row=5, column=0, columnspan=2, sticky="w", padx=20, pady=5)
+    passcode_frame.grid(row=7, column=0, columnspan=2, sticky="w", padx=20, pady=5)
 
     passcode = StringVar()
     Entry_widget = Entry(passcode_frame, textvariable=passcode, width=21, font=fixed_font, show="*", bd=0)
@@ -701,13 +740,13 @@ def machine_screen():
 
     Button(passcode_frame, text="Change Password", bg=btn_color6, relief=FLAT, fg=main_text, font=btn_fixed_font, activebackground=btn_color6, command=change_password).pack(side=LEFT, padx=(5, 0))
 
-    # Row 6: shift label
+    # Row 8: shift label
     shift_label = Label(text="Shift Amount:")
-    shift_label.grid(row=6, column=0, columnspan=2, sticky="w", padx=20, pady=(10, 0))
+    shift_label.grid(row=8, column=0, columnspan=2, sticky="w", padx=20, pady=(10, 0))
 
-    # Row 7: shift entry
+    # Row 9: shift entry
     shift_frame = Frame(machine_screen, bg=main_bg)
-    shift_frame.grid(row=7, column=0, columnspan=2, sticky="w", padx=20, pady=5)
+    shift_frame.grid(row=9, column=0, columnspan=2, sticky="w", padx=20, pady=5)
 
     def validate_number_input(new_value):
         if new_value == "":
@@ -740,9 +779,9 @@ def machine_screen():
     algorithm_var.trace_add("write", update_key_input_visibility)
     update_key_input_visibility()
 
-    #Row 8: Clear All Button
+    #Row 10: Clear All Button
     Button(text="Clear All", bg=btn_color3, fg=main_text, bd=0, font=btn_fixed_font, command=reset_machine).grid(
-        row=8, column=0, columnspan=2, sticky="ew", padx=20, pady=20, ipady=10
+        row=10, column=0, columnspan=2, sticky="ew", padx=20, pady=20, ipady=10
     )
 
     machine_screen.mainloop()
