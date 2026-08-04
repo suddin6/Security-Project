@@ -17,7 +17,7 @@ import base64
 import os
 import tkinter.font as tkfont
 import threading
-# Threading allows python to do more thn one thing at a time, rather than waiting for one task to finish before starting another
+# Threading allows python to do more than one thing at a time, rather than waiting for one task to finish before starting another
 # This allows us to have the little loading thing in the second text box
 # The main "thread" is basically GUI and the background "thread" is the encryption math
 # While it encrypts, main can animate the "Loading..."
@@ -28,7 +28,6 @@ from crypto_logic import ALGORITHMS, DEFAULT_ALGORITHM, INPUT_TYPE, rsa_generate
 from cryptography.hazmat.primitives import serialization
 
 algorithm_var = None  # will become a StringVar once machine_screen() creates the window
-
 
 # Encrypted and decrypted text outputs 
 encrypted_text = ""
@@ -60,7 +59,6 @@ old_pw = ""
 encrypt_screen = ""
 decrypt_screen = ""
 
-
 mode = "encrypt"  # global toggle state
 save_file_path = "saved_msgs.txt"
 has_valid_result = False
@@ -82,7 +80,6 @@ def choose_save_location():
         save_file_path = path
         messagebox.showinfo("SUCCESS", f"Save location set to:\n{save_file_path}")
 
-
 def animate_loading():
     global loading_job, loading_dots
     loading_dots = (loading_dots % 3) + 1
@@ -97,7 +94,6 @@ def stop_loading():
     if loading_job is not None:
         machine_screen.after_cancel(loading_job)
         loading_job = None
-
 
 def perform_action(selected_mode):
     global mode, has_valid_result, encrypted_text, decrypted_text
@@ -186,7 +182,6 @@ def perform_action(selected_mode):
             machine_screen.after(0, show_fail)
 
     threading.Thread(target=do_work, daemon=True).start()
-
 
 def clear_saved():
     global save_file_path
@@ -543,15 +538,6 @@ def show_error(message):
     second_text.insert(END, message, "error")
     second_text.configure(state=DISABLED)
 
-
-
-
-
-
-
-
-
-
 # Main GUI Screen for Cipher Machine Tool
 def machine_screen():
     global machine_screen, passcode, first_text, second_text, fixed_font, btn_fixed_font, encrypt_btn, decrypt_btn, algorithm_var, passcode_label, passcode_frame, shift_label, shift_frame, shift_var
@@ -675,18 +661,6 @@ def machine_screen():
     decrypt_btn = Button(text="Decrypt", bg=btn_color2, fg=main_text, bd=0, font=btn_fixed_font, command=lambda: perform_action("decrypt"))
     decrypt_btn.grid(row=2, column=1, sticky="ew", padx=(5, 20), pady=5, ipady=10)
 
-    # command=perform_action("encrypt") DOES NOT WORK!!! because Python runs the function immediately upon calling
-    # 
-    # 
-    # lambda: perform_action("encrypt") is the same as saying
-    #
-    #def encrypt():
-    #   perform_action("encrypt")
-    #
-    #encrypt()
-
-
-
     # Row 3: output box
     output_frame = Frame(machine_screen)
     output_frame.grid(row=3, column=0, columnspan=2, sticky="nsew", padx=20, pady=5)
@@ -762,8 +736,6 @@ def machine_screen():
         else:
             shift_label.grid_remove()
             shift_frame.grid_remove()
-
-    
 
     algorithm_var.trace_add("write", update_key_input_visibility)
     update_key_input_visibility()

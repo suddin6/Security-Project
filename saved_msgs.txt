@@ -1,3 +1,0 @@
-Here are your saved messages:
-Original: test
-Encrypted: dGVzdA==
