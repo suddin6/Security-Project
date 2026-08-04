@@ -742,7 +742,7 @@ def machine_screen():
 
     #Row 8: Clear All Button
     Button(text="Clear All", bg=btn_color3, fg=main_text, bd=0, font=btn_fixed_font, command=reset_machine).grid(
-        row=8, column=0, columnspan=2, sticky="ew", padx=20, pady=5, ipady=10
+        row=8, column=0, columnspan=2, sticky="ew", padx=20, pady=20, ipady=10
     )
 
     machine_screen.mainloop()
