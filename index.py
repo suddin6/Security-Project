@@ -7,7 +7,7 @@ Due: August 13, 2026
 Description: An encryption-decryption tool that utilizes a GUI interface and allows for secure messaging!
 '''
 
-# Importing from tkinter library (GUI), base64 (encryption + decryption), os (file handling)
+# Importing from tkinter library (GUI), base64, os (file handling)
 from tkinter import *
 from tkinter import messagebox
 from tkinter import simpledialog
